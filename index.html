@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>採購專案管理系統 - 最終完備版</title>
+    <title>採購專案管理系統 - 專業完備版</title>
     <!-- 引入核心套件 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -19,54 +19,43 @@
             margin: 0; padding: 0; color: #1e293b; 
         }
         
-        /* A3 橫式列印優化 */
         @media print {
             @page { size: A3 landscape; margin: 0.5cm; }
             body { background: white !important; }
             .no-print, .modal-close-btn { display: none !important; }
             .min-h-screen { padding: 0 !important; }
             .timeline-card { box-shadow: none !important; border: none !important; width: 100% !important; padding: 0 !important; }
-            .project-row { page-break-inside: avoid; }
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* 進度條樣式：100% 高飽和度 */
+        /* 高飽和度期程條 */
         .progress-bar-actual {
-            height: 100%;
-            position: absolute;
-            box-sizing: border-box;
-            opacity: 1 !important;
-            border-top: 1px solid rgba(255,255,255,0.2);
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-            z-index: 10;
+            height: 100%; position: absolute; box-sizing: border-box;
+            opacity: 1 !important; border-top: 1px solid rgba(255,255,255,0.2);
+            border-bottom: 1px solid rgba(0,0,0,0.1); z-index: 10;
         }
-        
-        .segment-rounded-l { border-top-left-radius: 14px; border-bottom-left-radius: 14px; }
-        .segment-rounded-r { border-top-right-radius: 14px; border-bottom-right-radius: 14px; }
+        .segment-rounded-l { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+        .segment-rounded-r { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
 
-        /* 視窗關閉鈕 */
         .modal-close-btn {
             position: absolute; top: 1.5rem; right: 1.5rem; width: 44px; height: 44px;
             display: flex; align-items: center; justify-content: center;
             background: #f1f5f9; border-radius: 50%; color: #475569;
-            font-size: 32px; font-weight: 900; line-height: 1;
-            cursor: pointer; z-index: 200; border: 1px solid #e2e8f0;
-            transition: all 0.2s;
+            font-size: 32px; font-weight: 900; cursor: pointer; z-index: 300;
+            border: 1px solid #e2e8f0; transition: 0.2s;
         }
         .modal-close-btn:hover { background: #fee2e2; color: #ef4444; transform: rotate(90deg); }
 
-        /* 展開按鈕樣式 */
         .expand-toggle-btn {
             width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
             border-radius: 10px; background: white; border: 2px solid #e2e8f0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;
         }
-        .expand-toggle-btn:hover { border-color: #9B0070; color: #9B0070; background: #fdf2f8; }
         .expand-active { background: #9B0070; border-color: #9B0070; color: white; }
 
-        /* 自定義切換開關 (Switch) */
+        /* 切換開關 (Switch) */
         .switch { position: relative; display: inline-block; width: 60px; height: 32px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
@@ -82,14 +71,7 @@
 
         .f-black { font-weight: 900; }
         .f-bold { font-weight: 700; }
-        
-        .step-bar {
-            height: 8px;
-            flex: 1;
-            border-radius: 10px;
-            background-color: #e2e8f0;
-            transition: all 0.3s ease;
-        }
+        .step-bar { height: 8px; flex: 1; border-radius: 10px; background-color: #e2e8f0; }
     </style>
 </head>
 <body>
@@ -98,7 +80,6 @@
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
         
-        // --- 核心配色 ---
         const THEME = {
             purple: '#9B0070', cyan: '#00B5AD', violet: '#A333C8',
             blue: '#2185D0', emerald: '#21BA45', planned: '#CBD5E1'
@@ -133,22 +114,16 @@
         };
 
         const App = () => {
-            // --- 狀態管理 ---
             const [projects, setProjects] = useState(() => {
-                const s = localStorage.getItem('proc_v_final_m_v115');
+                const s = localStorage.getItem('proc_v_p_master_v200');
                 if (s) return JSON.parse(s);
                 return [
                     { id: 1, title: '校園智慧化全面升級案', year: '2026', budget: 8900000, dept: ['資訊部'], handler: ['系統管理員'], stage: 2, status: 'normal', hasSubTasks: true, tasks: [{id:1, name:'核心交換機', stage:2, actual:{demand:{start:'2026-01-10', end:'2026-01-25'}, procurement:{start:'',end:''}, contract:{start:'',end:''}}}], planned: { demand: { start: '2026-01-10', end: '2026-02-28' }, procurement: { start: '2026-03-01', end: '2026-05-15' }, contract: { start: '2026-05-16', end: '2026-06-30' } }, actual: { demand: { start: '2026-01-15', end: '' }, procurement: { start: '', end: '' }, contract: { start: '', end: '' } } }
                 ];
             });
 
-            const [departments, setDepartments] = useState(() => JSON.parse(localStorage.getItem('proc_depts_v115')) || ['資訊部', '總務部', '營繕組', '教務處', '學務處', '研發部']);
-            const [handlers, setHandlers] = useState(() => JSON.parse(localStorage.getItem('proc_handlers_v115')) || ['林小華', '張小芬', '系統管理員']);
-
-            useEffect(() => localStorage.setItem('proc_v_final_m_v115', JSON.stringify(projects)), [projects]);
-            useEffect(() => localStorage.setItem('proc_depts_v115', JSON.stringify(departments)), [departments]);
-            useEffect(() => localStorage.setItem('proc_handlers_v115', JSON.stringify(handlers)), [handlers]);
-
+            const [departments, setDepartments] = useState(() => JSON.parse(localStorage.getItem('proc_depts_v200')) || ['資訊部', '總務部', '營繕組', '教務處', '研發部']);
+            const [handlers, setHandlers] = useState(() => JSON.parse(localStorage.getItem('proc_handlers_v200')) || ['林小華', '張小芬', '系統管理員']);
             const [viewMode, setViewMode] = useState('list');
             const [timelineDisplay, setTimelineDisplay] = useState('dual');
             const [isModalOpen, setIsModalOpen] = useState(false);
@@ -159,12 +134,16 @@
             const [searchTerm, setSearchTerm] = useState('');
             const [filterYear, setFilterYear] = useState('2026');
             const [filterHandler, setFilterHandler] = useState('All');
+            const [filterProgress, setFilterProgress] = useState('InProgress');
+
             const [newDeptInput, setNewDeptInput] = useState('');
             const [newHandlerInput, setNewHandlerInput] = useState('');
-
             const [newProject, setNewProject] = useState({ title: '', budget: '', handler: [], year: '2026', dept: [], hasSubTasks: false, tasks: [], p_demandS: '', p_demandE: '', p_procS: '', p_procE: '', p_contS: '', p_contE: '' });
 
-            // --- 核心邏輯函數 ---
+            useEffect(() => localStorage.setItem('proc_v_p_master_v200', JSON.stringify(projects)), [projects]);
+            useEffect(() => localStorage.setItem('proc_depts_v200', JSON.stringify(departments)), [departments]);
+            useEffect(() => localStorage.setItem('proc_handlers_v200', JSON.stringify(handlers)), [handlers]);
+
             const handleToggleArray = (target, field, value) => {
                 const setFunc = target === 'new' ? setNewProject : setEditingProject;
                 setFunc(prev => {
@@ -177,21 +156,20 @@
             const addSubTask = (target, name) => {
                 if (!name.trim()) return;
                 const newTask = { id: Date.now(), name: name.trim(), stage: 1, actual: { demand: { start: '', end: '' }, procurement: { start: '', end: '' }, contract: { start: '', end: '' } } };
-                if (target === 'new') setNewProject(prev => ({...prev, tasks: [...prev.tasks, newTask]}));
-                else setEditingProject(prev => ({ ...prev, tasks: [...(prev.tasks || []), newTask] }));
+                if (target === 'new') setNewProject(p => ({...p, tasks: [...p.tasks, newTask]}));
+                else setEditingProject(p => ({ ...p, tasks: [...(p.tasks || []), newTask] }));
             };
 
             const updateProjectMain = () => {
                 if (!editingProject) return;
-                setProjects(prev => prev.map(p => p.id === editingProject.id ? editingProject : p));
+                setProjects(projects.map(p => p.id === editingProject.id ? editingProject : p));
                 setEditingProject(null);
             };
 
             const handleAddProject = (e) => {
                 e.preventDefault();
                 const project = {
-                    id: Date.now(), ...newProject,
-                    budget: Number(newProject.budget) || 0,
+                    id: Date.now(), ...newProject, budget: Number(newProject.budget) || 0,
                     dept: newProject.dept.length ? newProject.dept : [departments[0]],
                     handler: newProject.handler.length ? newProject.handler : [handlers[0]],
                     stage: 1, status: 'normal',
@@ -204,11 +182,7 @@
             };
 
             const toggleExpansion = (id) => {
-                setExpandedProjectIds(prev => {
-                    const next = new Set(prev);
-                    if (next.has(id)) next.delete(id); else next.add(id);
-                    return next;
-                });
+                setExpandedProjectIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
             };
 
             const calculateBar = (start, end) => {
@@ -226,18 +200,21 @@
                     const mY = p.year === filterYear || p.planned?.demand?.start?.startsWith(filterYear);
                     const mS = p.title.toLowerCase().includes(searchTerm.toLowerCase());
                     const mH = filterHandler === 'All' || (p.handler && p.handler.includes(filterHandler));
-                    return mY && mS && mH;
+                    let mP = true;
+                    if (filterProgress === 'InProgress') mP = p.stage < 5 && (p.status === 'normal' || p.status === 'paused');
+                    else if (filterProgress === 'Finished') mP = p.stage === 5 || p.status === 'cancelled';
+                    return mY && mS && mH && mP;
                 }).sort((a, b) => b.id - a.id);
-            }, [projects, searchTerm, filterYear, filterHandler]);
+            }, [projects, searchTerm, filterYear, filterHandler, filterProgress]);
 
             return (
-                <div className="min-h-screen p-4 lg:p-10 f-bold">
+                <div className="min-h-screen p-4 lg:p-10 font-bold">
                     <div className="max-w-[1400px] mx-auto">
                         
                         <header className="flex justify-between items-center mb-10 no-print">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 rounded-2xl text-white shadow-xl bg-purple-700"><Icon name="Activity" size={28}/></div>
-                                <div><h1 className="text-2xl f-black text-slate-900 tracking-tight">採購專案管理</h1><p className="text-[10px] text-slate-400 tracking-widest uppercase f-black font-bold">Master Timeline Controller</p></div>
+                                <div className="p-3 rounded-2xl text-white shadow-xl bg-purple-700 font-black"><Icon name="Activity" size={28}/></div>
+                                <div><h1 className="text-2xl f-black text-slate-900 tracking-tight uppercase">採購專案管理</h1><p className="text-[10px] text-slate-400 tracking-widest uppercase font-black">Smart Controller v2.0</p></div>
                             </div>
                             <div className="flex gap-2 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200">
                                 <button onClick={()=>setViewMode('list')} className={`px-5 py-2 rounded-lg text-xs font-black transition-all ${viewMode==='list'?'bg-slate-900 text-white shadow-md':'text-slate-400 hover:bg-slate-50'}`}>清單模式</button>
@@ -247,90 +224,81 @@
 
                         <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-8 flex flex-col md:flex-row gap-4 items-center no-print">
                             <div className="relative flex-1 w-full flex items-center bg-slate-50 rounded-xl px-4">
-                                <Icon name="Search" className="text-slate-300" size={18}/><input className="w-full bg-transparent border-none py-3 text-sm outline-none pl-2 f-black font-bold" placeholder="搜尋案件..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
+                                <Icon name="Search" className="text-slate-300" size={18}/><input className="w-full bg-transparent border-none py-3 text-sm outline-none pl-2 f-black font-bold" placeholder="搜尋案件名稱..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
                             </div>
                             <div className="flex gap-3 w-full md:w-auto font-black">
-                                <select className="flex-1 bg-slate-50 border-none rounded-xl px-4 py-2 text-sm f-bold text-indigo-700 cursor-pointer outline-none" value={filterHandler} onChange={e=>setFilterHandler(e.target.value)}>
-                                    <option value="All">全部主責人員</option>
-                                    {handlers.map(h => <option key={h} value={h}>{h}</option>)}
-                                </select>
-                                <select className="flex-1 bg-slate-50 border-none rounded-xl px-4 py-2 text-sm cursor-pointer outline-none f-bold" value={filterYear} onChange={e=>setFilterYear(e.target.value)}>{YEARS.map(y => <option key={y} value={y}>{y} 年度</option>)}</select>
-                                <button onClick={()=>setIsSettingModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-xl shadow-md text-xs f-bold transition-all hover:bg-slate-700"><Icon name="Settings2" size={16} color="#fff" /><span>組織設定</span></button>
-                                <button onClick={()=>setIsModalOpen(true)} className="px-5 py-2 rounded-lg text-xs text-white f-black bg-purple-700 shadow-lg hover:bg-purple-800 transition-all">+ 新增案件</button>
+                                <select className="flex-1 bg-slate-50 border-none rounded-xl px-4 py-2.5 text-sm f-bold text-indigo-700 cursor-pointer outline-none" value={filterHandler} onChange={e=>setFilterHandler(e.target.value)}><option value="All">全部主責</option>{handlers.map(h => <option key={h} value={h}>{h}</option>)}</select>
+                                <select className="flex-1 bg-slate-50 border-none rounded-xl px-4 py-2.5 text-sm f-bold text-purple-700 cursor-pointer outline-none" value={filterProgress} onChange={e=>setFilterProgress(e.target.value)}><option value="All">全部狀態</option><option value="InProgress">進行中 (含暫停)</option><option value="Finished">已完成 (含取消)</option></select>
+                                <select className="flex-1 bg-slate-50 border-none rounded-xl px-4 py-2.5 text-sm cursor-pointer outline-none f-bold" value={filterYear} onChange={e=>setFilterYear(e.target.value)}>{YEARS.map(y => <option key={y} value={y}>{y} 年度</option>)}</select>
+                                <button onClick={()=>setIsSettingModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-xl shadow-md text-xs f-bold hover:bg-slate-700 transition-all font-black"><Icon name="Settings2" size={16} color="#fff" /><span>組織設定</span></button>
+                                <button onClick={()=>setIsModalOpen(true)} className="px-5 py-2 rounded-lg text-xs text-white f-black bg-purple-700 shadow-lg hover:bg-purple-800 transition-all font-black">+ 新增案件</button>
                             </div>
                         </div>
 
                         {viewMode === 'list' ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in font-bold">
                                 {filteredProjects.map(p => {
                                     const isExp = expandedProjectIds.has(p.id);
                                     const sObj = STATUS_OPTIONS.find(s => s.id === p.status) || STATUS_OPTIONS[0];
-                                    const comp = (p.tasks || []).filter(t => t.stage === 5).length;
+                                    const stageObj = STAGE_CONFIG.find(s => s.id === p.stage) || STAGE_CONFIG[0];
                                     return (
                                         <div key={p.id} className={`bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col h-full hover:shadow-xl transition-all ${p.status==='cancelled'||p.stage===5?'opacity-70 grayscale-[0.2]':''}`}>
                                             <div className="mb-4 flex justify-between items-start font-black">
                                                 <div className="flex flex-wrap gap-1 font-bold">{(p.dept || []).map(d => <span key={d} className="px-2.5 py-1 bg-indigo-50 text-indigo-500 text-[9px] rounded-lg uppercase">{d}</span>)}</div>
-                                                {p.status !== 'normal' && <span className="text-[10px] px-2.5 py-1 rounded-lg text-white font-black" style={{backgroundColor: sObj.color}}>{sObj.name}</span>}
+                                                {p.status !== 'normal' && <span className="text-[10px] px-2.5 py-1 rounded-lg text-white font-black font-bold" style={{backgroundColor: sObj.color}}>{sObj.name}</span>}
                                             </div>
-                                            <div className="min-h-[3.5rem] mb-1 f-black text-slate-800 text-xl leading-tight">{p.title}</div>
-                                            <p className="text-2xl f-black text-indigo-600 mb-6 font-black tracking-tight">${p.budget.toLocaleString()}</p>
+                                            <div className="min-h-[3.5rem] mb-1 f-black text-slate-800 text-xl leading-tight font-black">{p.title}</div>
+                                            <p className="text-2xl f-black text-indigo-600 mb-6 font-black font-bold">${p.budget.toLocaleString()}</p>
                                             <div className="mb-6 flex-1">
                                                 {p.hasSubTasks ? (
                                                     <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 font-bold">
-                                                        <button onClick={()=>toggleExpansion(p.id)} className={`w-full py-2.5 rounded-xl text-[10px] f-black flex items-center justify-center gap-2 ${isExp ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-400 shadow-sm'}`}><Icon name={isExp ? "ChevronUp" : "ListTree"} size={12} /> {isExp ? '收合詳情' : `查看分項 (${p.tasks.length})`}</button>
+                                                        <button onClick={()=>toggleExpansion(p.id)} className={`w-full py-2.5 rounded-xl text-[10px] f-black flex items-center justify-center gap-2 ${isExp ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-400'}`}><Icon name={isExp ? "ChevronUp" : "ListTree"} size={12} /> {isExp ? '收合詳情' : `查看分項 (${p.tasks.length})`}</button>
                                                         {isExp && (<div className="mt-4 space-y-2 animate-fade-in font-black">{p.tasks.map(t => (<div key={t.id} className="flex justify-between text-[11px] text-slate-600 border-b border-white pb-1.5 last:border-0 font-bold"><span>• {t.name}</span><span className="font-bold" style={{color: STAGE_CONFIG.find(s=>s.id===t.stage)?.color}}>{STAGE_CONFIG.find(s=>s.id===t.stage)?.name.substring(0,2)}</span></div>))}</div>)}
                                                     </div>
                                                 ) : <div className="h-[52px]"></div>}
                                             </div>
-                                            <div className="space-y-4 mb-6 font-black">
-                                                <div className="flex justify-between text-[11px] text-slate-400 uppercase"><span>計畫進度階段</span><span style={{color: STAGE_CONFIG.find(s=>s.id===p.stage)?.color}} className="font-bold">{STAGE_CONFIG.find(s=>s.id===p.stage)?.name}</span></div>
-                                                {/* 修復：進度條渲染 */}
-                                                <div className="flex gap-1.5">{STAGE_CONFIG.map(s => <div key={s.id} className="step-bar" style={{backgroundColor: p.stage >= s.id ? s.color : '#e2e8f0', opacity: p.stage === s.id ? 1 : 0.4}} />)}</div>
+                                            <div className="space-y-4 mb-6 font-black font-bold">
+                                                <div className="flex justify-between text-[11px] text-slate-400 uppercase font-black font-bold"><span>計畫進度階段</span><span style={{color: stageObj.color}} className="font-bold">{stageObj.name}</span></div>
+                                                <div className="flex gap-1.5">{STAGE_CONFIG.map(s => <div key={s.id} className="step-bar" style={{backgroundColor: p.stage >= s.id ? (p.status === 'cancelled' ? '#cbd5e1' : s.color) : '#e2e8f0', opacity: p.stage === s.id ? 1 : 0.4}} />)}</div>
                                             </div>
-                                            <div className="mt-auto flex justify-between items-center pt-4 border-t border-slate-50 font-black">
-                                                <div className="text-[12px] text-slate-400">主責: <span className="text-slate-700 font-bold">{p.handler.join('、')}</span></div>
-                                                <div className="flex gap-5"><button onClick={()=>setEditingProject(p)} className="text-xs text-indigo-600 hover:underline font-bold">編輯詳情</button><button onClick={()=>setDeleteConfirmId(p.id)} className="text-xs text-rose-500 hover:underline font-bold">刪除</button></div>
-                                            </div>
+                                            <div className="mt-auto flex justify-between items-center pt-4 border-t font-black"><div className="text-[12px] text-slate-400 font-bold font-black">主責: <span className="text-slate-700">{p.handler.join('、')}</span></div><div className="flex gap-5 font-black font-bold"><button onClick={()=>setEditingProject(p)} className="text-xs text-indigo-600 hover:underline">編輯詳情</button><button onClick={()=>setDeleteConfirmId(p.id)} className="text-xs text-rose-500 hover:underline">刪除</button></div></div>
                                         </div>
                                     );
                                 })}
                             </div>
                         ) : (
-                            /* --- 年度期程大表 --- */
                             <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 overflow-x-auto animate-fade-in">
                                 <div className="min-w-[1200px] f-bold">
-                                    <div className="flex justify-between items-end mb-12 border-b border-slate-50 pb-8 f-black font-black">
-                                        <div><h4 className="text-2xl f-black text-slate-800 tracking-tighter">年度採購期程軌跡</h4><div className="flex gap-2 mt-4 no-print bg-slate-100 p-1 rounded-xl w-fit font-bold"><button onClick={()=>setTimelineDisplay('dual')} className={`px-6 py-2 rounded-lg text-xs transition-all ${timelineDisplay==='dual' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-400'}`}>對比模式</button><button onClick={()=>setTimelineDisplay('actual')} className={`px-6 py-2 rounded-lg text-xs transition-all ${timelineDisplay==='actual' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-400'}`}>實際模式</button></div></div>
-                                        <button onClick={()=>window.print()} className="no-print flex items-center gap-2 px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs f-black shadow-lg hover:brightness-110 font-black"><Icon name="Printer" size={16}/> 匯出報表 (A3)</button>
+                                    <div className="flex justify-between items-end mb-12 border-b border-slate-50 pb-8 f-black">
+                                        <div><h4 className="text-2xl f-black text-slate-800 tracking-tighter font-black font-bold uppercase">年度採購期程軌跡</h4><div className="flex gap-2 mt-4 no-print bg-slate-100 p-1 rounded-xl w-fit font-bold font-black"><button onClick={()=>setTimelineDisplay('dual')} className={`px-6 py-2 rounded-lg text-xs transition-all ${timelineDisplay==='dual' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-400'}`}>對比模式</button><button onClick={()=>setTimelineDisplay('actual')} className={`px-6 py-2 rounded-lg text-xs transition-all ${timelineDisplay==='actual' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-400'}`}>實際模式</button></div></div>
+                                        <button onClick={()=>window.print()} className="no-print flex items-center gap-2 px-8 py-3 bg-slate-900 text-white rounded-2xl text-xs f-black shadow-lg hover:brightness-110 font-bold"><Icon name="Printer" size={16}/> 匯出報表 (A3)</button>
                                     </div>
-                                    <div className="flex mb-6 px-4 text-slate-300 text-[11px] uppercase f-black font-bold tracking-widest"><div className="w-[320px]">專案名稱 / 主責</div><div className="flex-1 grid grid-cols-12 text-center border-l border-slate-50">{MONTHS.map(m => <div key={m}>{m}</div>)}</div></div>
+                                    <div className="flex mb-6 px-4 text-slate-300 text-[11px] uppercase f-black font-bold tracking-widest font-black"><div className="w-[320px]">專案名稱 / 主責</div><div className="flex-1 grid grid-cols-12 text-center border-l border-slate-50 font-black">{MONTHS.map(m => <div key={m}>{m}</div>)}</div></div>
                                     <div className="space-y-14 font-black">
                                         {filteredProjects.map(p => {
                                             const isExp = expandedProjectIds.has(p.id);
                                             return (
-                                                <div key={p.id} className="space-y-5 project-row">
+                                                <div key={p.id} className="space-y-5 project-row f-black">
                                                     <div className="flex items-center gap-6 group">
-                                                        <div className="w-[320px] flex-shrink-0 flex items-center gap-4 font-black font-bold">
-                                                            <button onClick={()=>p.hasSubTasks && toggleExpansion(p.id)} className={`expand-toggle-btn no-print ${isExp ? 'expand-active shadow-md' : ''} ${p.hasSubTasks ? '' : 'invisible'}`}>{isExp ? <Icon name="ChevronDown" size={18}/> : <Icon name="ChevronRight" size={18}/>}</button>
-                                                            <div className="cursor-pointer flex-1 font-bold" onClick={()=>setEditingProject(p)}><div className="f-black text-[16px] text-slate-800 leading-tight mb-1 hover:text-purple-700">{p.title}</div><span className="text-[10px] text-slate-400 uppercase tracking-widest">{p.handler.join('、')}</span></div>
+                                                        <div className="w-[320px] flex-shrink-0 flex items-center gap-4">
+                                                            <button onClick={()=>p.hasSubTasks && toggleExpansion(p.id)} className={`expand-toggle-btn no-print ${isExp ? 'expand-active' : ''} ${p.hasSubTasks ? '' : 'invisible'}`}>{isExp ? <Icon name="ChevronDown" size={18}/> : <Icon name="ChevronRight" size={18}/>}</button>
+                                                            <div className="cursor-pointer flex-1 font-bold" onClick={()=>setEditingProject(p)}><div className="f-black text-[16px] text-slate-800 leading-tight mb-1 hover:text-purple-700 transition-colors font-black">{p.title}</div><span className="text-[10px] text-slate-400 uppercase tracking-widest font-black">{p.handler.join('、')}</span></div>
                                                         </div>
-                                                        <div className="flex-1 relative h-10 bg-slate-50 rounded-2xl overflow-hidden border border-slate-100">
-                                                            {timelineDisplay === 'dual' && (
-                                                                <div className="absolute inset-0 opacity-40">{['demand', 'procurement', 'contract'].map((cat, i) => (<div key={`p-${cat}`} className="absolute h-full" style={{...calculateBar(p.planned[cat].start, p.planned[cat].end), backgroundColor: i===0?'#94a3b8':i===1?'#64748b':'#334155'}}></div>))}</div>
-                                                            )}
+                                                        <div className="flex-1 relative h-10 bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 font-black">
+                                                            {timelineDisplay === 'dual' && (<div className="absolute inset-0 opacity-40">{['demand', 'procurement', 'contract'].map((cat, i) => (<div key={`p-${cat}`} className="absolute h-full" style={{...calculateBar(p.planned[cat].start, p.planned[cat].end), backgroundColor: i===0?'#94a3b8':i===1?'#64748b':'#334155'}}></div>))}</div>)}
                                                             <div className={`absolute w-full flex items-center ${timelineDisplay === 'dual' ? 'inset-y-2' : 'inset-y-0'}`}>
                                                                 {['demand', 'procurement', 'contract'].map((cat, i) => {
                                                                     const bs = calculateBar(p.actual[cat].start, p.actual[cat].end);
-                                                                    const colorMap = [THEME.cyan, THEME.violet, THEME.blue];
-                                                                    return <div key={`a-${cat}`} className={`progress-bar-actual shadow-sm ${i===0?'segment-rounded-l':''} ${i===2?'segment-rounded-r':''}`} style={{...bs, backgroundColor: timelineDisplay === 'dual' ? THEME.purple : colorMap[i], border: 'none'}}></div>;
+                                                                    const c = timelineDisplay === 'dual' ? THEME.purple : [THEME.cyan, THEME.violet, THEME.blue][i];
+                                                                    return <div key={`a-${cat}`} className={`progress-bar-actual shadow-sm ${i===0?'segment-rounded-l':''} ${i===2?'segment-rounded-r':''}`} style={{...bs, backgroundColor: c, border: 'none'}}></div>;
                                                                 })}
                                                             </div>
                                                         </div>
                                                     </div>
                                                     {isExp && p.tasks && p.tasks.map(t => (
                                                         <div key={t.id} className="flex items-center gap-6 pl-14 animate-fade-in font-black">
-                                                            <div className="w-[280px] text-[13px] text-slate-500 f-bold truncate border-l-4 border-purple-500/30 pl-4">{t.name}</div>
-                                                            <div className="flex-1 relative h-6 bg-slate-50/50 rounded-xl overflow-hidden border border-slate-100 font-black"><div className="absolute inset-0 flex items-center">{['demand', 'procurement', 'contract'].map((cat, i) => (<div key={cat} className="progress-bar-actual" style={{...calculateBar(t.actual[cat].start, t.actual[cat].end), backgroundColor: [THEME.cyan, THEME.violet, THEME.blue][i], border: 'none'}}></div>))}</div></div>
+                                                            <div className="w-[280px] text-[13px] text-slate-500 f-bold truncate border-l-4 border-purple-500/30 pl-4 font-bold font-black">| {t.name}</div>
+                                                            <div className="flex-1 relative h-6 bg-slate-50/50 rounded-xl overflow-hidden border border-slate-100"><div className="absolute inset-0 flex items-center font-black">{['demand', 'procurement', 'contract'].map((cat, i) => (<div key={cat} className="progress-bar-actual" style={{...calculateBar(t.actual[cat].start, t.actual[cat].end), backgroundColor: [THEME.cyan, THEME.violet, THEME.blue][i], border: 'none'}}></div>))}</div></div>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -341,31 +309,31 @@
                             </div>
                         )}
 
-                        {/* --- 組織管理 (橫向佈局強制修復) --- */}
+                        {/* --- 組織管理 (橫向對齊穩定修正) --- */}
                         {isSettingModalOpen && (
                             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[200] no-print">
-                                <div className="bg-white rounded-[3.5rem] w-[850px] p-12 shadow-2xl relative border border-white/20 f-black overflow-hidden font-bold">
+                                <div className="bg-white rounded-[3.5rem] w-full max-w-4xl p-12 shadow-2xl relative border border-white/20 f-black overflow-hidden font-bold">
                                     <div onClick={()=>setIsSettingModalOpen(false)} className="modal-close-btn">×</div>
                                     <h2 className="text-3xl f-black mb-12 flex items-center gap-4 font-black"><Icon name="Settings2" size={32} color={THEME.purple}/> 組織架構管理</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 font-black">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 font-black">
                                         <div className="space-y-6">
                                             <label className="text-[12px] f-black text-slate-400 uppercase tracking-widest flex items-center gap-2 font-black font-bold font-black"><Icon name="Building2" size={18}/> 需求處室維護</label>
-                                            <div className="flex flex-row items-center gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-100">
-                                                <input className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm font-bold outline-none" value={newDeptInput} onChange={e=>setNewDeptInput(e.target.value)} placeholder="名稱..." />
-                                                <button onClick={()=>{if(newDeptInput.trim()){setDepartments([...departments, newDeptInput.trim()]); setNewDeptInput('');}}} className="whitespace-nowrap flex-shrink-0 px-6 py-2.5 bg-slate-900 text-white rounded-xl text-xs fw-900 shadow-md font-black">新增</button>
+                                            <div className="flex flex-row items-center gap-3 p-1.5 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
+                                                <input className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm font-bold outline-none font-black" value={newDeptInput} onChange={e=>setNewDeptInput(e.target.value)} placeholder="名稱..." />
+                                                <button onClick={()=>{if(newDeptInput.trim()){setDepartments([...departments, newDeptInput.trim()]); setNewDeptInput('');}}} className="whitespace-nowrap px-6 py-2.5 bg-slate-900 text-white rounded-xl text-xs fw-900 font-black">新增</button>
                                             </div>
-                                            <div className="max-h-64 overflow-y-auto space-y-2 custom-scrollbar pr-2 font-black">
-                                                {departments.map(d=>(<div key={d} className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-100 shadow-sm font-black"><span className="text-sm font-bold">{d}</span><button onClick={()=>setDepartments(prev => prev.filter(x => x !== d))} className="text-rose-400 font-bold text-[11px] hover:text-rose-600 transition-all font-black">刪除</button></div>))}
+                                            <div className="max-h-80 overflow-y-auto space-y-2 custom-scrollbar pr-3 font-black">
+                                                {departments.map(d=>(<div key={d} className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100 shadow-sm font-black font-bold font-black"><span className="text-sm f-black font-bold">{d}</span><button onClick={()=>setDepartments(prev => prev.filter(x => x !== d))} className="text-rose-400 f-black text-[11px] hover:text-rose-600 transition-all font-black font-bold">刪除</button></div>))}
                                             </div>
                                         </div>
-                                        <div className="space-y-6 border-l border-slate-100 pl-10 font-black">
-                                            <label className="text-[12px] f-black text-slate-400 uppercase tracking-widest flex items-center gap-2 font-black font-bold font-black"><Icon name="User" size={18}/> 採購主責人員</label>
-                                            <div className="flex flex-row items-center gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-100">
-                                                <input className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm font-bold outline-none" value={newHandlerInput} onChange={e=>setNewHandlerInput(e.target.value)} placeholder="姓名..." />
-                                                <button onClick={()=>{if(newHandlerInput.trim()){setHandlers([...handlers, newHandlerInput.trim()]); setNewHandlerInput('');}}} className="whitespace-nowrap flex-shrink-0 px-6 py-2.5 bg-slate-900 text-white rounded-xl text-xs fw-900 shadow-md font-black">新增</button>
+                                        <div className="space-y-6 border-l border-slate-100 pl-12">
+                                            <label className="text-[12px] f-black text-slate-400 uppercase tracking-widest flex items-center gap-2 font-black font-bold font-black font-black font-bold"><Icon name="User" size={18}/> 採購主責人員</label>
+                                            <div className="flex flex-row items-center gap-3 p-1.5 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
+                                                <input className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm font-bold outline-none font-black" value={newHandlerInput} onChange={e=>setNewHandlerInput(e.target.value)} placeholder="姓名..." />
+                                                <button onClick={()=>{if(newHandlerInput.trim()){setHandlers([...handlers, newHandlerInput.trim()]); setNewHandlerInput('');}}} className="whitespace-nowrap px-6 py-2.5 bg-slate-900 text-white rounded-xl text-xs fw-900 font-black">新增</button>
                                             </div>
-                                            <div className="max-h-64 overflow-y-auto space-y-2 custom-scrollbar pr-2 font-black">
-                                                {handlers.map(h=>(<div key={h} className="flex justify-between items-center bg-indigo-50/40 p-4 rounded-xl border border-indigo-100/50 shadow-sm font-black"><span className="text-sm f-black font-bold">{h}</span><button onClick={()=>setHandlers(prev => prev.filter(x => x !== h))} className="text-rose-400 font-bold text-[11px] hover:underline font-black">刪除</button></div>))}
+                                            <div className="max-h-80 overflow-y-auto space-y-2 custom-scrollbar pr-3 font-black">
+                                                {handlers.map(h=>(<div key={h} className="flex justify-between items-center bg-indigo-50/40 p-4 rounded-2xl border border-indigo-100/50 shadow-sm font-black font-bold font-black font-black"><span className="text-sm f-black font-bold">{h}</span><button onClick={()=>setHandlers(prev => prev.filter(x => x !== h))} className="text-rose-400 font-bold text-[11px] hover:underline font-black">刪除</button></div>))}
                                             </div>
                                         </div>
                                     </div>
@@ -373,75 +341,87 @@
                             </div>
                         )}
 
-                        {/* --- 新增與編輯 共通視窗 (修復功能與多選) --- */}
-                        {(isModalOpen || editingProject) && (
+                        {/* --- 案件編輯視窗 (垂直日期排版修正) --- */}
+                        {editingProject && (
                             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl flex items-center justify-center p-4 z-[100] no-print animate-fade-in font-black">
                                 <div className="bg-white rounded-[3.5rem] w-full max-w-7xl shadow-2xl flex flex-col max-h-[95vh] relative overflow-hidden font-bold border border-white/20">
-                                    <div onClick={()=>{setIsModalOpen(false); setEditingProject(null);}} className="modal-close-btn">×</div>
-                                    <div className="p-10 border-b flex items-center gap-6 bg-white shadow-sm font-black"><div className="p-4 rounded-3xl bg-slate-900 text-white shadow-xl font-black font-bold font-black"><Icon name={isModalOpen ? "Plus" : "Edit3"} size={28}/></div><div><h2 className="text-3xl f-black text-slate-800">{isModalOpen ? "啟動新採購計畫" : "編輯案件詳情"}</h2><p className="text-xs text-indigo-500 font-black mt-1 tracking-widest uppercase font-black">期程、單位與主責資源管理</p></div></div>
-                                    <div className="flex-1 overflow-y-auto p-12 grid grid-cols-1 lg:grid-cols-12 gap-12 bg-slate-50/30 custom-scrollbar font-black">
-                                        <div className={`space-y-10 ${(isModalOpen ? newProject.hasSubTasks : editingProject.hasSubTasks) ? 'lg:col-span-6' : 'lg:col-span-12'}`}>
-                                            <section className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8 font-black font-bold">
-                                                <h3 className="text-xs f-black text-slate-400 uppercase tracking-widest font-black font-bold">1. 核心設定 (單位/主責)</h3>
-                                                <div className="space-y-6">
-                                                    <div><label className="text-[11px] f-black text-slate-400 uppercase block mb-2 tracking-widest">案件標題</label><input required className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm f-bold shadow-inner" value={isModalOpen ? newProject.title : editingProject.title} onChange={e=>{const v=e.target.value; isModalOpen ? setNewProject({...newProject, title:v}) : setEditingProject({...editingProject, title:v});}} /></div>
+                                    <div onClick={()=>setEditingProject(null)} className="modal-close-btn">×</div>
+                                    <div className="p-10 border-b flex items-center gap-6 bg-white font-black"><div className="p-4 rounded-3xl bg-slate-900 text-white shadow-xl font-black font-bold"><Icon name="Edit3" size={28}/></div><div><h2 className="text-3xl f-black text-slate-800 font-black font-bold">{editingProject.title}</h2><p className="text-xs text-indigo-500 font-black mt-1 tracking-widest uppercase font-black">完整期程控管與多選資源指派</p></div></div>
+                                    <div className="flex-1 overflow-y-auto p-12 grid grid-cols-1 lg:grid-cols-12 gap-12 bg-slate-50/30 custom-scrollbar font-black font-bold">
+                                        <div className={`space-y-10 ${editingProject.hasSubTasks ? 'lg:col-span-5' : 'lg:col-span-12'}`}>
+                                            <section className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8 font-black font-bold font-black">
+                                                <h3 className="text-xs f-black text-slate-400 uppercase tracking-widest font-black font-bold font-black">1. 基本資料與組織配置</h3>
+                                                <div className="space-y-6 font-black">
+                                                    <div><label className="text-[11px] f-black text-slate-400 uppercase block mb-2 tracking-widest font-black">案件標題</label><input required className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm f-bold shadow-inner font-black" value={editingProject.title} onChange={e=>setEditingProject({...editingProject, title:e.target.value})} /></div>
                                                     <div className="grid grid-cols-2 gap-5 font-black">
-                                                        <div><label className="text-[11px] f-black text-slate-400 uppercase block mb-2 tracking-widest">預算金額</label><input type="number" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm f-bold shadow-inner" value={isModalOpen ? newProject.budget : editingProject.budget} onChange={e=>{const v=e.target.value; isModalOpen ? setNewProject({...newProject, budget:v}) : setEditingProject({...editingProject, budget:v});}} /></div>
-                                                        <div><label className="text-[11px] f-black text-slate-400 uppercase block mb-2 tracking-widest">案件年度</label><select className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm f-bold cursor-pointer" value={isModalOpen ? newProject.year : editingProject.year} onChange={e=>{const v=e.target.value; isModalOpen ? setNewProject({...newProject, year:v}) : setEditingProject({...editingProject, year:v});}}>{YEARS.map(y=><option key={y} value={y}>{y} 年度</option>)}</select></div>
+                                                        <div><label className="text-[11px] f-black text-slate-400 uppercase block mb-2 tracking-widest font-black font-bold">預算金額</label><input type="number" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm f-bold shadow-inner font-black" value={editingProject.budget} onChange={e=>setEditingProject({...editingProject, budget:e.target.value})} /></div>
+                                                        <div><label className="text-[11px] f-black text-slate-400 uppercase block mb-2 tracking-widest font-black font-bold">計畫年度</label><select className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm f-bold cursor-pointer font-black" value={editingProject.year} onChange={e=>setEditingProject({...editingProject, year:e.target.value})}>{YEARS.map(y=><option key={y} value={y}>{y} 年度</option>)}</select></div>
                                                     </div>
-                                                    <div className="space-y-3 font-black"><label className="text-[11px] f-black text-slate-400 uppercase tracking-widest font-black font-bold">需求處室 (可多選)</label><div className="flex flex-wrap gap-2">{departments.map(d=>(<button type="button" key={d} onClick={()=>handleToggleArray(isModalOpen?'new':'edit','dept',d)} className={`px-4 py-2 rounded-xl text-[11px] fw-900 border transition-all ${(isModalOpen?newProject:editingProject).dept.includes(d)?'bg-indigo-600 text-white border-transparent shadow-md':'bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100'}`}>{d}</button>))}</div></div>
-                                                    <div className="space-y-3 font-black"><label className="text-[11px] f-black text-slate-400 uppercase tracking-widest font-black font-bold">採購主責人員 (可多選)</label><div className="flex flex-wrap gap-2">{handlers.map(h=>(<button type="button" key={h} onClick={()=>handleToggleArray(isModalOpen?'new':'edit','handler',h)} className={`px-4 py-2 rounded-xl text-[11px] fw-900 border transition-all ${(isModalOpen?newProject:editingProject).handler.includes(h)?'bg-purple-700 text-white border-transparent shadow-md':'bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100'}`}>{h}</button>))}</div></div>
-                                                    <div className="p-6 bg-slate-50 rounded-3xl flex justify-between items-center border border-slate-100 font-black"><span className="text-sm font-black font-bold font-black">啟用分項管理功能</span><label className="switch"><input type="checkbox" checked={isModalOpen ? newProject.hasSubTasks : editingProject.hasSubTasks} onChange={() => { const s = isModalOpen ? newProject : editingProject; const sf = isModalOpen ? setNewProject : setEditingProject; sf({...s, hasSubTasks: !s.hasSubTasks}); }} /><span className="slider"></span></label></div>
+                                                    <div className="space-y-3 font-black"><label className="text-[11px] f-black text-slate-400 uppercase tracking-widest font-black font-bold">需求處室 (可多選)</label><div className="flex flex-wrap gap-2">{departments.map(d=>(<button type="button" key={d} onClick={()=>handleToggleArray('edit','dept',d)} className={`px-4 py-2 rounded-xl text-[11px] fw-900 border transition-all ${editingProject.dept.includes(d)?'bg-indigo-600 text-white shadow-md border-transparent':'bg-slate-50 text-slate-400 border-slate-100'}`}>{d}</button>))}</div></div>
+                                                    <div className="space-y-3 font-black"><label className="text-[11px] f-black text-slate-400 uppercase tracking-widest font-black font-bold">採購人員 (可多選)</label><div className="flex flex-wrap gap-2">{handlers.map(h=>(<button type="button" key={h} onClick={()=>handleToggleArray('edit','handler',h)} className={`px-4 py-2 rounded-xl text-[11px] fw-900 border transition-all ${editingProject.handler.includes(h)?'bg-purple-700 text-white shadow-md border-transparent':'bg-slate-50 text-slate-400'}`}>{h}</button>))}</div></div>
+                                                    <div className="p-6 bg-slate-50 rounded-3xl flex justify-between items-center border border-slate-100 font-black"><span className="text-sm font-black font-bold">啟用分項管理功能</span><label className="switch"><input type="checkbox" checked={editingProject.hasSubTasks} onChange={() => setEditingProject({...editingProject, hasSubTasks: !editingProject.hasSubTasks})} /><span className="slider"></span></label></div>
                                                 </div>
                                             </section>
-
-                                            {/* 分項區 (開啟開關顯示) */}
-                                            {(isModalOpen ? newProject.hasSubTasks : editingProject.hasSubTasks) && (
-                                                <section className="bg-white p-10 rounded-[3rem] border border-indigo-100 shadow-sm space-y-8 animate-fade-in font-black">
-                                                    <h3 className="text-xs f-black text-indigo-600 uppercase tracking-widest flex items-center gap-3 font-black font-bold"><Icon name="ListTree" size={18}/> 分項任務編輯</h3>
-                                                    <div className="flex flex-row gap-3"><input id="sub-task-add-field-main" className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm f-bold shadow-inner" placeholder="分項名稱..." onKeyDown={e=>{if(e.key==='Enter'){addSubTask(isModalOpen?'new':'edit', e.target.value); e.target.value='';}}} /><button type="button" onClick={()=>{const el=document.getElementById('sub-task-add-field-main'); addSubTask(isModalOpen?'new':'edit', el.value); el.value='';}} className="bg-slate-900 text-white px-8 rounded-2xl shadow-xl font-black">新增</button></div>
-                                                    <div className="space-y-4 font-black">{(isModalOpen ? newProject.tasks : editingProject.tasks).map(t=>(<div key={t.id} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex justify-between items-center"><span>{t.name}</span><button onClick={()=>{const n=(isModalOpen?newProject.tasks:editingProject.tasks).filter(x=>x.id!==t.id); isModalOpen ? setNewProject({...newProject, tasks:n}) : setEditingProject({...editingProject, tasks:n});}} className="text-rose-400 font-bold text-xs">移除</button></div>))}</div>
-                                                </section>
-                                            )}
+                                            <section className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8 font-black font-bold font-black">
+                                               <h3 className="text-xs f-black text-indigo-600 uppercase tracking-widest font-black font-bold">2. 案件狀態與流程進度</h3>
+                                               <div className="grid grid-cols-5 gap-3 font-black">{STAGE_CONFIG.map(s => <button key={s.id} onClick={()=>setEditingProject({...editingProject, stage: s.id})} className={`flex flex-col items-center p-5 rounded-2xl border transition-all ${editingProject.stage === s.id ? 'bg-indigo-600 text-white shadow-xl scale-105 font-black' : 'bg-slate-50 text-slate-400'}`}><span className="text-[10px] font-black mb-1 opacity-60 font-black">S{s.id}</span><span className="text-[10px] text-center leading-tight font-black font-bold">{s.name}</span></button>)}</div>
+                                               <div className="flex gap-4 font-black">{STATUS_OPTIONS.map(opt => <button key={opt.id} onClick={() => setEditingProject({...editingProject, status: opt.id})} className={`flex-1 py-4 rounded-2xl text-sm font-black border transition-all ${editingProject.status === opt.id ? `bg-slate-900 text-white shadow-xl` : 'bg-slate-50 text-slate-400'}`} >{opt.name}</button>)}</div>
+                                            </section>
                                         </div>
 
-                                        <div className={`space-y-10 ${(isModalOpen || (editingProject && !editingProject.hasSubTasks)) ? 'lg:col-span-12' : 'lg:col-span-6'}`}>
-                                            <section className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-10 font-black font-bold">
-                                                {!isModalOpen && (
-                                                  <div className="space-y-8 pb-10 border-b border-slate-50 font-black">
-                                                     <h3 className="text-xs f-black text-indigo-600 uppercase tracking-widest font-black font-bold">2. 案件進度與狀態</h3>
-                                                     <div className="grid grid-cols-5 gap-3">{STAGE_CONFIG.map(s => <button key={s.id} onClick={()=>setEditingProject({...editingProject, stage: s.id})} className={`flex flex-col items-center p-5 rounded-2xl border transition-all ${editingProject.stage === s.id ? 'bg-indigo-600 text-white shadow-xl' : 'bg-slate-50 text-slate-400'}`}><span className="text-[10px] font-black mb-1 opacity-60">S{s.id}</span><span className="text-[10px] text-center leading-tight font-black">{s.name}</span></button>)}</div>
-                                                     <div className="flex gap-4">{STATUS_OPTIONS.map(opt => <button key={opt.id} onClick={() => setEditingProject({...editingProject, status: opt.id})} className={`flex-1 py-4 rounded-2xl text-sm font-black border transition-all ${editingProject.status === opt.id ? `bg-slate-900 text-white shadow-xl border-transparent` : 'bg-slate-50 text-slate-400'}`} >{opt.name}</button>)}</div>
-                                                  </div>
-                                                )}
-                                                <h3 className="text-xs f-black text-slate-400 uppercase tracking-widest font-black">3. 計畫與實際期程設定</h3>
+                                        <div className={`space-y-10 ${editingProject.hasSubTasks ? 'lg:col-span-7' : 'lg:col-span-12'}`}>
+                                            {/* 重要：修正日期重疊，採用垂直堆疊排列 */}
+                                            <section className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-12 font-black font-bold">
+                                                <h3 className="text-xs f-black text-slate-400 uppercase tracking-widest font-black font-bold font-black font-bold">3. 實際與計畫期程設定</h3>
                                                 {['demand', 'procurement', 'contract'].map((cat, idx) => (
-                                                    <div key={cat} className="space-y-6 font-black">
-                                                        <div className="px-1"><span className="text-base f-black text-slate-700 font-bold">{idx+1}. {STAGE_CONFIG.find(s=>s.category === (cat==='procurement'?'procurement':cat==='contract'?'contract':'demand')).name}</span></div>
-                                                        <div className="grid grid-cols-2 gap-6 font-black font-bold">
-                                                            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 shadow-inner font-black"><label className="block text-[9px] f-black text-slate-400 uppercase mb-2 font-black">計畫期程 (Planned)</label>
-                                                                <div className="flex gap-2 font-black"><input type="date" className="w-full text-sm font-bold text-slate-400 bg-transparent" value={isModalOpen ? newProject[`p_${cat==='procurement'?'proc':cat==='contract'?'cont':'demand'}S`] : editingProject.planned[cat].start} onChange={e=>{const v=e.target.value; isModalOpen ? setNewProject({...newProject, [`p_${cat==='procurement'?'proc':cat==='contract'?'cont':'demand'}S`]:v}) : setEditingProject({...editingProject, planned:{...editingProject.planned, [cat]:{...editingProject.planned[cat], start: v}}});}} /><input type="date" className="w-full text-sm font-bold text-slate-400 bg-transparent" value={isModalOpen ? newProject[`p_${cat==='procurement'?'proc':cat==='contract'?'cont':'demand'}E`] : editingProject.planned[cat].end} onChange={e=>{const v=e.target.value; isModalOpen ? setNewProject({...newProject, [`p_${cat==='procurement'?'proc':cat==='contract'?'cont':'demand'}E`]:v}) : setEditingProject({...editingProject, planned:{...editingProject.planned, [cat]:{...editingProject.planned[cat], end: v}}});}} /></div>
+                                                    <div key={cat} className="space-y-6 font-black border-b border-slate-50 pb-8 last:border-0 last:pb-0">
+                                                        <div className="px-1"><span className="text-base f-black text-slate-700 font-black font-bold">{idx+1}. {STAGE_CONFIG.find(s=>s.category === (cat==='procurement'?'procurement':cat==='contract'?'contract':'demand')).name}</span></div>
+                                                        <div className="flex flex-col gap-6 font-black font-bold">
+                                                            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 shadow-inner font-black"><label className="block text-[10px] f-black text-slate-400 uppercase mb-3 tracking-widest font-bold">計畫日期 (Planned)</label>
+                                                                <div className="flex flex-row items-center gap-6 font-black"><input type="date" className="flex-1 text-sm font-bold text-slate-400 bg-transparent outline-none font-black" value={editingProject.planned[cat].start} onChange={e=>setEditingProject({...editingProject, planned:{...editingProject.planned, [cat]:{...editingProject.planned[cat], start: e.target.value}}})} /><span className="text-slate-200 font-black font-bold">至</span><input type="date" className="flex-1 text-sm font-bold text-slate-400 bg-transparent outline-none font-black" value={editingProject.planned[cat].end} onChange={e=>setEditingProject({...editingProject, planned:{...editingProject.planned, [cat]:{...editingProject.planned[cat], end: e.target.value}}})} /></div>
                                                             </div>
-                                                            {!isModalOpen && (
-                                                              <div className="bg-indigo-50/40 border border-indigo-100 rounded-2xl p-4 shadow-lg font-black"><label className="block text-[9px] f-black text-indigo-400 uppercase mb-2 font-black font-bold">實際期程 (Actual)</label>
-                                                                  <div className="flex gap-2 font-black"><input type="date" className="w-full text-sm font-black text-slate-800 bg-transparent" value={editingProject.actual[cat].start} onChange={e=>setEditingProject({...editingProject, actual:{...editingProject.actual, [cat]:{...editingProject.actual[cat], start: e.target.value}}})} /><input type="date" className="w-full text-sm font-black text-slate-800 bg-transparent" value={editingProject.actual[cat].end} onChange={e=>setEditingProject({...editingProject, actual:{...editingProject.actual, [cat]:{...editingProject.actual[cat], end: e.target.value}}})} /></div>
-                                                              </div>
-                                                            )}
+                                                            <div className="bg-indigo-50/40 border border-indigo-100 rounded-3xl p-6 shadow-md font-black"><label className="block text-[10px] f-black text-indigo-400 uppercase mb-3 tracking-widest font-bold font-black">實際執行 (Actual)</label>
+                                                                <div className="flex flex-row items-center gap-6 font-black font-bold"><input type="date" className="flex-1 text-sm f-black text-slate-800 bg-transparent outline-none font-black" value={editingProject.actual[cat].start} onChange={e=>setEditingProject({...editingProject, actual:{...editingProject.actual, [cat]:{...editingProject.actual[cat], start: e.target.value}}})} /><span className="text-indigo-200 font-black font-bold">至</span><input type="date" className="flex-1 text-sm f-black text-slate-800 bg-transparent outline-none font-black" value={editingProject.actual[cat].end} onChange={e=>setEditingProject({...editingProject, actual:{...editingProject.actual, [cat]:{...editingProject.actual[cat], end: e.target.value}}})} /></div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 ))}
-                                                {!isModalOpen && (
-                                                  <div className="pt-6 font-black"><label className="text-[10px] f-black text-slate-400 uppercase tracking-widest font-black block mb-3 font-bold">4. 案件特殊備註</label><textarea className="w-full bg-slate-50 border border-slate-100 rounded-3xl p-6 text-sm f-bold outline-none focus:bg-white transition-all min-h-[120px] font-black" value={editingProject.remarks} onChange={e=>setEditingProject({...editingProject, remarks: e.target.value})} placeholder="在此紀錄進度細節..." /></div>
-                                                )}
+                                                <div className="pt-6 font-black font-bold font-black"><label className="text-[10px] f-black text-slate-400 uppercase tracking-widest block mb-3 font-bold font-black">4. 案件特殊備註</label><textarea className="w-full bg-slate-50 border border-slate-100 rounded-3xl p-6 text-sm f-bold outline-none focus:bg-white transition-all min-h-[140px] font-black font-bold" value={editingProject.remarks} onChange={e=>setEditingProject({...editingProject, remarks: e.target.value})} placeholder="記錄進度或特殊細項..." /></div>
                                             </section>
                                         </div>
                                     </div>
-                                    <div className="p-10 border-t flex justify-end gap-6 bg-white shadow-xl f-black font-black font-bold"><button onClick={()=>{setIsModalOpen(false); setEditingProject(null);}} className="px-12 py-4 bg-slate-100 text-slate-400 rounded-2xl uppercase transition-all hover:bg-slate-200 font-bold">取消</button><button onClick={isModalOpen ? handleAddProject : updateProjectMain} className="px-24 py-4 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all font-bold font-black font-bold" style={{background: THEME.purple}}>確認並存檔</button></div>
+                                    <div className="p-10 border-t flex justify-end gap-6 bg-white shadow-xl f-black font-black font-bold font-black font-bold font-black"><button onClick={()=>setEditingProject(null)} className="px-12 py-4 bg-slate-100 text-slate-400 rounded-2xl uppercase transition-all hover:bg-slate-200 font-bold font-black">取消返回</button><button onClick={updateProjectMain} className="px-24 py-4 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all font-bold font-black font-bold font-black" style={{background: THEME.purple}}>確認並存檔</button></div>
                                 </div>
                             </div>
                         )}
 
-                        {deleteConfirmId && (<div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[300] no-print f-black font-bold"><div className="bg-white p-12 rounded-[3.5rem] shadow-2xl text-center max-w-sm animate-fade-in relative f-black"><div onClick={()=>setDeleteConfirmId(null)} className="modal-close-btn">×</div><div className="w-20 h-20 bg-rose-50 text-rose-600 rounded-3xl flex items-center justify-center mx-auto mb-8 animate-bounce font-black"><Icon name="AlertTriangle" size={40}/></div><h3 className="text-2xl fw-900 mb-4 font-black font-bold">確定永久移除？</h3><div className="flex flex-col gap-3 font-black"><button onClick={()=>{setProjects(projects.filter(p=>p.id!==deleteConfirmId)); setDeleteConfirmId(null);}} className="py-4 bg-rose-600 text-white rounded-2xl shadow-lg font-black font-bold font-black font-bold">確認永久刪除</button><button onClick={()=>setDeleteConfirmId(null)} className="py-4 bg-slate-50 text-slate-400 rounded-2xl font-black">返回</button></div></div></div>)}
+                        {/* --- 新增視窗 (保持計畫日期功能) --- */}
+                        {isModalOpen && (
+                            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl flex items-center justify-center p-4 z-[100] no-print animate-fade-in font-black font-bold font-black font-bold">
+                                <div className="bg-white rounded-[3rem] w-full max-w-4xl p-12 shadow-2xl relative border border-white/20 font-black font-bold">
+                                    <div onClick={()=>setIsModalOpen(false)} className="modal-close-btn">×</div>
+                                    <h2 className="text-3xl f-black mb-10 flex items-center gap-4 font-black font-bold font-black font-black"><Icon name="PlusCircle" color={THEME.purple} size={32}/> 啟動新採購計畫</h2>
+                                    <form onSubmit={handleAddProject} className="grid grid-cols-1 md:grid-cols-2 gap-10 font-black">
+                                        <div className="space-y-6 font-black font-bold">
+                                            <div><label className="text-[11px] f-black text-slate-400 uppercase block mb-2 tracking-widest font-black">案件標題</label><input required className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm f-bold shadow-inner font-black font-bold" placeholder="輸入名稱..." value={newProject.title} onChange={e=>setNewProject({...newProject, title: e.target.value})} /></div>
+                                            <div className="grid grid-cols-2 gap-5 font-black font-bold">
+                                                <div><label className="text-[11px] f-black text-slate-400 uppercase block mb-2 tracking-widest font-black font-bold">預算</label><input type="number" className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm f-bold shadow-inner" placeholder="0" value={newProject.budget} onChange={e=>setNewProject({...newProject, budget: e.target.value})} /></div>
+                                                <div><label className="text-[11px] f-black text-slate-400 uppercase block mb-2 tracking-widest font-black font-bold">年度</label><select className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm f-bold font-black" value={newProject.year} onChange={e=>setNewProject({...newProject, year: e.target.value})}>{YEARS.map(y=><option key={y} value={y}>{y} 年度</option>)}</select></div>
+                                            </div>
+                                            <div className="space-y-3 font-black"><label className="text-[11px] f-black text-slate-400 uppercase tracking-widest font-black font-bold">需求處室 (可多選)</label><div className="flex flex-wrap gap-2">{departments.map(d=>(<button type="button" key={d} onClick={()=>handleToggleArray('new','dept',d)} className={`px-4 py-2 rounded-xl text-[11px] fw-900 border transition-all ${newProject.dept.includes(d)?'bg-indigo-600 text-white shadow-md border-transparent':'bg-slate-50 text-slate-400'}`}>{d}</button>))}</div></div>
+                                            <div className="space-y-3 font-black"><label className="text-[11px] f-black text-slate-400 uppercase tracking-widest font-black font-bold">主責人員 (可多選)</label><div className="flex flex-wrap gap-2">{handlers.map(h=>(<button type="button" key={h} onClick={()=>handleToggleArray('new','handler',h)} className={`px-4 py-2 rounded-xl text-[11px] fw-900 border transition-all ${newProject.handler.includes(h)?'bg-purple-700 text-white shadow-md border-transparent':'bg-slate-50 text-slate-400'}`}>{h}</button>))}</div></div>
+                                        </div>
+                                        <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-5 font-black font-bold">
+                                            <h3 className="text-xs f-black text-slate-400 uppercase tracking-widest font-black font-bold font-black"><Icon name="Calendar" size={16}/> 規畫計畫期程 (Planned)</h3>
+                                            {[{k:'demand',l:'需求'},{k:'proc',l:'採購'},{k:'cont',l:'合約'}].map(i=>(<div key={i.k} className="space-y-1.5 font-black font-bold"><span className="text-[10px] text-slate-500 uppercase font-black">{i.l}階段</span><div className="flex gap-3"><input type="date" required className="flex-1 p-3 rounded-xl border-none text-[11px] shadow-sm font-black font-bold" onChange={e=>setNewProject({...newProject, [`p_${i.k}S`]: e.target.value})} /><input type="date" required className="flex-1 p-3 rounded-xl border-none text-[11px] shadow-sm font-black font-bold" onChange={e=>setNewProject({...newProject, [`p_${i.k}E`]: e.target.value})} /></div></div>))}
+                                        </div>
+                                        <button type="submit" className="md:col-span-2 py-5 rounded-[1.5rem] text-white font-black text-xl shadow-2xl hover:brightness-110 active:scale-95 transition-all font-black font-bold" style={{background: THEME.purple}}>發布案件計畫</button>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+
+                        {deleteConfirmId && (<div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[300] no-print f-black font-bold font-black"><div className="bg-white p-12 rounded-[3.5rem] shadow-2xl text-center max-w-sm animate-fade-in relative f-black font-black font-bold font-black font-bold font-black"><div onClick={()=>setDeleteConfirmId(null)} className="modal-close-btn">×</div><div className="w-20 h-20 bg-rose-50 text-rose-600 rounded-3xl flex items-center justify-center mx-auto mb-8 animate-bounce font-black"><Icon name="AlertTriangle" size={40}/></div><h3 className="text-2xl fw-900 mb-4 font-black font-bold font-black">確定永久移除？</h3><div className="flex flex-col gap-3 font-black font-bold font-black font-bold font-black font-bold"><button onClick={()=>{setProjects(projects.filter(p=>p.id!==deleteConfirmId)); setDeleteConfirmId(null);}} className="py-4 bg-rose-600 text-white rounded-2xl shadow-lg font-black font-bold font-black font-bold font-black">確認永久刪除</button><button onClick={()=>setDeleteConfirmId(null)} className="py-4 bg-slate-50 text-slate-400 rounded-2xl font-black font-bold font-black">返回</button></div></div></div>)}
                     </div>
                 </div>
             );
