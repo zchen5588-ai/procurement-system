@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>採購專案管理系統 v45.3 - 專業報表列印版</title>
+    <title>採購專案管理系統 v48.0 - 急迫性優先排序版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -13,46 +13,35 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; color: #334155; }
         
-        /* --- 報表列印核心設定 (A3 橫式) --- */
         @media print {
             @page { 
-                size: A3 landscape; /* 設定 A3 橫向 */
-                margin: 15mm;       /* 預留邊距 */
+                size: A3 landscape;
+                margin: 10mm;
             }
-            
             body { 
                 background: white !important; 
-                -webkit-print-color-adjust: exact; /* 強制列印背景色與顏色 */
+                -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact;
                 color: black !important;
             }
-
-            /* 隱藏網頁介面元素 */
             .no-print, header, .modal-overlay, .switch, .modal-close-btn, button { display: none !important; }
-            
-            /* 重置容器寬度，確保填滿 A3 */
             #root, .min-h-screen, .max-w-\[1400px\] { 
                 padding: 0 !important; 
                 margin: 0 !important; 
                 width: 100% !important; 
                 max-width: none !important; 
             }
-            
-            /* 期程大表專用列印樣式 */
             .print-area { 
                 width: 100% !important; 
                 overflow: visible !important; 
                 display: block !important;
             }
-
             .bg-white, .shadow-sm, .rounded-\[3rem\], .rounded-\[2rem\], .border-slate-100 {
                 box-shadow: none !important;
                 border: none !important;
                 border-radius: 0 !important;
                 background: transparent !important;
             }
-
-            /* 標題與月份列 */
             .header-print {
                 border-bottom: 2px solid #000 !important;
                 margin-bottom: 10px !important;
@@ -60,8 +49,6 @@
                 color: #000 !important;
                 font-weight: 900 !important;
             }
-
-            /* 確保每一個案件(含分項)不會被切斷，整塊換頁 */
             .project-row { 
                 break-inside: avoid; 
                 page-break-inside: avoid; 
@@ -69,18 +56,12 @@
                 padding-bottom: 15px !important; 
                 margin-bottom: 15px !important; 
             }
-            
-            /* 調整文字顏色為深黑，提升閱讀性 */
             .text-slate-400, .text-slate-500 { color: #475569 !important; }
             .text-slate-800 { color: #000 !important; }
-
-            /* 隱藏計畫條 (Planned) - 讓畫面更乾淨 (若您想保留可移除此行) */
             .planned-bar { display: none !important; }
-            
-            /* 調整時間軸軌道樣式 */
             .timeline-track {
-                background-color: #f1f5f9 !important; /* 淺灰底 */
-                border: 1px solid #e2e8f0 !important; /* 細邊框 */
+                background-color: #f1f5f9 !important;
+                border: 1px solid #e2e8f0 !important;
                 box-shadow: none !important;
             }
         }
@@ -103,7 +84,18 @@
         .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .badge { display: inline-flex; align-items: center; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; line-height: 1; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .status-badge { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            padding: 0.35rem 0.85rem; 
+            border-radius: 0.5rem; 
+            font-size: 0.75rem; 
+            font-weight: 900; 
+            letter-spacing: 0.05em; 
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -111,10 +103,10 @@
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
         
-        // --- 視覺核心：康橋色系 ---
         const THEME = { 
             purple: '#9B0070', cyan: '#009B9B', blue: '#2563eb', emerald: '#10b981', 
-            dark: '#1e293b', planned: '#cbd5e1', text_sec: '#64748b'
+            dark: '#1e293b', planned: '#cbd5e1', text_sec: '#64748b',
+            orange: '#f59e0b', red: '#ef4444'
         };
         
         const STAGE_CONFIG = [
@@ -132,65 +124,79 @@
         ];
 
         const STATUS_OPTIONS = [
-            { id: 'normal', name: '執行中', color: '#10b981' }, 
-            { id: 'paused', name: '暫停中', color: '#f59e0b' }, 
-            { id: 'cancelled', name: '已取消', color: '#ef4444' } 
+            { id: 'normal', name: '執行中', icon: 'PlayCircle', color: THEME.cyan }, 
+            { id: 'paused', name: '暫停中', icon: 'PauseCircle', color: THEME.orange }, 
+            { id: 'cancelled', name: '已取消', icon: 'XCircle', color: THEME.red },
+            { id: 'finished', name: '已完成', icon: 'CheckCircle2', color: THEME.emerald }
         ];
 
         const MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
         const CURRENT_YEAR_NUM = new Date().getFullYear();
         const DYNAMIC_YEARS = Array.from({ length: 12 }, (_, i) => (2024 + i).toString());
 
-        const Icon = ({ name, size = 16, className = "" }) => {
+        const Icon = ({ name, size = 16, className = "", color = "currentColor" }) => {
             if (!window.lucide) return null;
             const kebabName = name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
             const iconData = window.lucide.icons[kebabName];
-            return iconData ? <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} dangerouslySetInnerHTML={{ __html: iconData[1].map(tag => `<${tag[0]} ${Object.entries(tag[1]).map(([k, v]) => `${k}="${v}"`).join(' ')}></${tag[0]}>`).join('') }} /> : null;
+            return iconData ? <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} dangerouslySetInnerHTML={{ __html: iconData[1].map(tag => `<${tag[0]} ${Object.entries(tag[1]).map(([k, v]) => `${k}="${v}"`).join(' ')}></${tag[0]}>`).join('') }} /> : null;
         };
 
-        const DeptSelector = ({ options, selected = [], onChange }) => {
+        const MultiSelector = ({ options, selected = [], onChange, label }) => {
+            const safeSelected = Array.isArray(selected) ? selected : (selected ? [selected] : []);
             const toggle = (opt) => {
-                if (selected.includes(opt)) onChange(selected.filter(s => s !== opt));
-                else onChange([...selected, opt]);
+                if (safeSelected.includes(opt)) onChange(safeSelected.filter(s => s !== opt));
+                else onChange([...safeSelected, opt]);
             };
             return (
                 <div className="flex flex-wrap gap-2">
                     {options.map(opt => (
-                        <button key={opt} type="button" onClick={() => toggle(opt)} className={`px-4 py-2 rounded-xl text-xs font-black tracking-wide border transition-all ${selected.includes(opt) ? 'bg-slate-800 text-white border-slate-800 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>
+                        <button key={opt} type="button" onClick={() => toggle(opt)} className={`px-4 py-2 rounded-xl text-xs font-black tracking-wide border transition-all ${safeSelected.includes(opt) ? 'bg-slate-800 text-white border-slate-800 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>
                             {opt}
                         </button>
                     ))}
-                    {selected.length === 0 && <span className="text-[10px] text-rose-500 self-center font-bold">* 必選</span>}
+                    {safeSelected.length === 0 && <span className="text-[10px] text-rose-500 self-center font-bold">* 請選擇{label}</span>}
                 </div>
             );
         };
 
         const App = () => {
             const [projects, setProjects] = useState(() => {
-                const s = localStorage.getItem('proc_db_v45_3'); 
+                const s = localStorage.getItem('proc_db_v48'); 
                 if (s) return JSON.parse(s);
                 return [
                     { 
-                        id: 1715432001, title: '2026年度核心機房升級與虛擬化建置', year: '2026', deadline: '2026-08-30', budget: 5800000, dept: ['資訊部'], handler: '系統管理員', stage: 2, status: 'normal', hasSubTasks: true, remarks: '',
+                        id: 1715432001, title: '2026年度核心機房升級與虛擬化建置', year: '2026', deadline: '2026-08-30', budget: 5800000, dept: ['資訊部'], handlers: ['系統管理員'], stage: 2, status: 'normal', hasSubTasks: true, remarks: '',
                         tasks: [{id: 101, name: '核心交換機採購', stage: 2, actual: { demand: {start: '2026-01-05', end: '2026-01-25'}, procurement: {start: '2026-01-26', end: ''}, contract: {start: '', end: ''} }}],
                         planned: { demand: { start: '2026-01-01', end: '2026-01-31' }, procurement: { start: '2026-02-01', end: '2026-04-15' }, contract: { start: '2026-04-16', end: '2026-08-30' } },
                         actual: { demand: { start: '2026-01-05', end: '2026-01-25' }, procurement: { start: '2026-01-26', end: '' }, contract: { start: '', end: '' } } 
                     },
                     {
-                        id: 1715431002, title: '行政大樓外牆耐震補強工程', year: '2025', deadline: '2026-12-31', budget: 25000000, dept: ['總務部', '營繕組'], handler: '林大為', stage: 4, status: 'normal', hasSubTasks: true, remarks: '',
+                        id: 1715431002, title: '行政大樓外牆耐震補強工程', year: '2025', deadline: '2026-12-31', budget: 25000000, dept: ['總務部', '營繕組'], handlers: ['林大為'], stage: 4, status: 'normal', hasSubTasks: true, remarks: '',
                         tasks: [{id: 201, name: '結構補強施工', stage: 4, actual: { demand: {}, procurement: {}, contract: {} }}],
                         planned: { demand: { start: '2025-09-01', end: '2025-11-30' }, procurement: { start: '2025-12-01', end: '2026-03-01' }, contract: { start: '2026-03-02', end: '2026-12-31' } },
                         actual: { demand: { start: '2025-09-10', end: '2025-11-25' }, procurement: { start: '2025-12-05', end: '2026-02-28' }, contract: { start: '2026-03-10', end: '' } }
+                    },
+                    {
+                        id: 1715430003, title: '全校雙語教學教材聯合採購', year: '2026', deadline: '2026-02-20', budget: 850000, dept: ['教務處'], handlers: ['張小美'], stage: 5, status: 'finished', hasSubTasks: false, remarks: '已結案',
+                        tasks: [],
+                        planned: { demand: { start: '', end: '' }, procurement: { start: '', end: '' }, contract: { start: '', end: '' } },
+                        actual: { demand: { start: '', end: '' }, procurement: { start: '', end: '' }, contract: { start: '', end: '' } }
+                    },
+                    {
+                        id: 1715433004, title: '夏季校園冷氣清洗保養', year: '2026', deadline: '2026-05-31', budget: 450000, dept: ['總務部'], handlers: ['林大為'], stage: 1, status: 'paused', hasSubTasks: false, remarks: '預算凍結中',
+                        tasks: [],
+                        planned: { demand: { start: '', end: '' }, procurement: { start: '', end: '' }, contract: { start: '', end: '' } },
+                        actual: { demand: { start: '', end: '' }, procurement: { start: '', end: '' }, contract: { start: '', end: '' } }
                     }
                 ];
             });
 
-            const [departments, setDepartments] = useState(() => JSON.parse(localStorage.getItem('depts_v45_3')) || ['資訊部', '總務部', '營繕組', '教務處', '學務處', '研發部']);
-            const [handlers, setHandlers] = useState(() => JSON.parse(localStorage.getItem('handlers_v45_3')) || ['系統管理員', '林大為', '張小美']);
+            const [departments, setDepartments] = useState(() => JSON.parse(localStorage.getItem('depts_v48')) || ['資訊部', '總務部', '營繕組', '教務處', '學務處', '研發部']);
+            const [handlers, setHandlers] = useState(() => JSON.parse(localStorage.getItem('handlers_v48')) || ['系統管理員', '林大為', '張小美']);
             
-            useEffect(() => localStorage.setItem('proc_db_v45_3', JSON.stringify(projects)), [projects]);
-            useEffect(() => localStorage.setItem('depts_v45_3', JSON.stringify(departments)), [departments]);
-            useEffect(() => localStorage.setItem('handlers_v45_3', JSON.stringify(handlers)), [handlers]);
+            useEffect(() => localStorage.setItem('proc_db_v48', JSON.stringify(projects)), [projects]);
+            useEffect(() => localStorage.setItem('depts_v48', JSON.stringify(departments)), [departments]);
+            useEffect(() => localStorage.setItem('handlers_v48', JSON.stringify(handlers)), [handlers]);
 
             const [viewMode, setViewMode] = useState('list');
             const [isModalOpen, setIsModalOpen] = useState(false);
@@ -199,57 +205,23 @@
             const [expandedIds, setExpandedIds] = useState(new Set());
             const [deleteConfirmId, setDeleteConfirmId] = useState(null);
             const [timelineDisplay, setTimelineDisplay] = useState('dual');
-            
             const [searchTerm, setSearchTerm] = useState('');
             const [filterYear, setFilterYear] = useState(CURRENT_YEAR_NUM.toString());
             const [filterHandler, setFilterHandler] = useState('All');
             const [filterStatus, setFilterStatus] = useState('All');
-
             const [newDeptInput, setNewDeptInput] = useState('');
             const [newHandlerInput, setNewHandlerInput] = useState('');
-            const [newP, setNewP] = useState({ title: '', budget: '', deadline: '', handler: '', year: CURRENT_YEAR_NUM.toString(), depts: [], hasSubTasks: false, p_demandS: '', p_demandE: '', p_procS: '', p_procE: '', p_contS: '', p_contE: '' });
+            const [newP, setNewP] = useState({ title: '', budget: '', deadline: '', handlers: [], year: CURRENT_YEAR_NUM.toString(), depts: [], hasSubTasks: false, p_demandS: '', p_demandE: '', p_procS: '', p_procE: '', p_contS: '', p_contE: '' });
 
+            const getHandlers = (p) => { if (p.handlers && Array.isArray(p.handlers)) return p.handlers; if (p.handler) return [p.handler]; return []; };
             const toggleExpansion = (id) => setExpandedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
             const executeDelete = () => { setProjects(prev => prev.filter(p => p.id !== deleteConfirmId)); setDeleteConfirmId(null); };
-            
-            const addSubTask = (name) => {
-                if (!name.trim()) return;
-                const task = { 
-                    id: Date.now(), name: name.trim(), stage: 1, 
-                    actual: { demand: {start: '', end: ''}, procurement: {start: '', end: ''}, contract: {start: '', end: ''} }
-                };
-                setEditingProject(prev => ({...prev, tasks: [...(prev.tasks || []), task]}));
-            };
-            const updateSubTaskDate = (taskId, cat, field, val) => {
-                setEditingProject(prev => ({ ...prev, tasks: prev.tasks.map(t => t.id === taskId ? { ...t, actual: { ...t.actual, [cat]: { ...t.actual?.[cat], [field]: val } } } : t) }));
-            };
+            const addSubTask = (name) => { if (!name.trim()) return; const task = { id: Date.now(), name: name.trim(), stage: 1, actual: { demand: {start: '', end: ''}, procurement: {start: '', end: ''}, contract: {start: '', end: ''} } }; setEditingProject(prev => ({...prev, tasks: [...(prev.tasks || []), task]})); };
+            const updateSubTaskDate = (taskId, cat, field, val) => { setEditingProject(prev => ({ ...prev, tasks: prev.tasks.map(t => t.id === taskId ? { ...t, actual: { ...t.actual, [cat]: { ...t.actual?.[cat], [field]: val } } } : t) })); };
             const removeSubTask = (id) => setEditingProject(prev => ({...prev, tasks: prev.tasks.filter(t => t.id !== id)}));
             const handleSaveEdit = () => { setProjects(prev => prev.map(p => p.id === editingProject.id ? editingProject : p)); setEditingProject(null); };
-            
-            const handleAddProject = (e) => {
-                e.preventDefault();
-                if (newP.depts.length === 0) { alert('請至少選擇一個部門'); return; }
-                const p = {
-                    id: Date.now(), ...newP, budget: Number(newP.budget) || 0,
-                    dept: newP.depts, 
-                    handler: newP.handler || handlers[0],
-                    stage: 1, status: 'normal', tasks: [],
-                    planned: { demand: {start: newP.p_demandS, end: newP.p_demandE}, procurement: {start: newP.p_procS, end: newP.p_procE}, contract: {start: newP.p_contS, end: newP.p_contE} },
-                    actual: { demand: {start: '', end: ''}, procurement: {start: '', end: ''}, contract: {start: '', end: ''} }
-                };
-                setProjects([p, ...projects]); setIsModalOpen(false); 
-                setNewP({ title: '', budget: '', deadline: '', handler: '', year: CURRENT_YEAR_NUM.toString(), depts: [], hasSubTasks: false, p_demandS: '', p_demandE: '', p_procS: '', p_procE: '', p_contS: '', p_contE: '' });
-            };
-
-            const calculateBar = (start, end) => {
-                if (!start || !end) return { display: 'none' };
-                const vy = parseInt(filterYear);
-                const sd = new Date(start), ed = new Date(end), ys = new Date(`${vy}-01-01`), ye = new Date(`${vy}-12-31`);
-                if (ed < ys || sd > ye) return { display: 'none' };
-                const sp = Math.max(0, (sd - ys) / (1000 * 60 * 60 * 24));
-                const ep = Math.min(365, (ed - ys) / (1000 * 60 * 60 * 24) + 1);
-                return { left: `${(sp / 365) * 100}%`, width: `${((ep - sp) / 365) * 100}%` };
-            };
+            const handleAddProject = (e) => { e.preventDefault(); if (newP.depts.length === 0) { alert('請至少選擇一個部門'); return; } if (newP.handlers.length === 0) { alert('請至少選擇一位採購人員'); return; } const p = { id: Date.now(), ...newP, budget: Number(newP.budget) || 0, dept: newP.depts, handlers: newP.handlers, stage: 1, status: 'normal', tasks: [], planned: { demand: {start: newP.p_demandS, end: newP.p_demandE}, procurement: {start: newP.p_procS, end: newP.p_procE}, contract: {start: newP.p_contS, end: newP.p_contE} }, actual: { demand: {start: '', end: ''}, procurement: {start: '', end: ''}, contract: {start: '', end: ''} } }; setProjects([p, ...projects]); setIsModalOpen(false); setNewP({ title: '', budget: '', deadline: '', handlers: [], year: CURRENT_YEAR_NUM.toString(), depts: [], hasSubTasks: false, p_demandS: '', p_demandE: '', p_procS: '', p_procE: '', p_contS: '', p_contE: '' }); };
+            const calculateBar = (start, end) => { if (!start || !end) return { display: 'none' }; const vy = parseInt(filterYear); const sd = new Date(start), ed = new Date(end), ys = new Date(`${vy}-01-01`), ye = new Date(`${vy}-12-31`); if (ed < ys || sd > ye) return { display: 'none' }; const sp = Math.max(0, (sd - ys) / (1000 * 60 * 60 * 24)); const ep = Math.min(365, (ed - ys) / (1000 * 60 * 60 * 24) + 1); return { left: `${(sp / 365) * 100}%`, width: `${((ep - sp) / 365) * 100}%` }; };
 
             const filteredData = useMemo(() => {
                 let filtered = projects.filter(p => {
@@ -258,20 +230,43 @@
                     const eY = p.planned.contract.end ? new Date(p.planned.contract.end).getFullYear() : sY;
                     const isWithinYear = (viewY >= sY && viewY <= eY);
                     const matchSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase());
-                    const matchHandler = filterHandler === 'All' || p.handler === filterHandler;
+                    const pHandlers = getHandlers(p);
+                    const matchHandler = filterHandler === 'All' || pHandlers.includes(filterHandler);
                     let matchStatus = true;
-                    if (filterStatus === 'InProgress') matchStatus = p.stage < 5 && p.status !== 'cancelled';
-                    else if (filterStatus === 'Finished') matchStatus = p.stage === 5 || p.status === 'cancelled';
+                    if (filterStatus === 'InProgress') matchStatus = ['normal', 'paused'].includes(p.status);
+                    else if (filterStatus === 'Finished') matchStatus = ['cancelled', 'finished'].includes(p.status);
                     return isWithinYear && matchSearch && matchHandler && matchStatus;
                 });
+
+                // 排序：1.執行中(按需求日Asc) -> 2.暫停 -> 3.取消 -> 4.已完工
                 return filtered.sort((a, b) => {
-                    const getWeight = (p) => { if (p.stage === 5) return 4; if (p.status === 'cancelled') return 3; if (p.status === 'paused') return 2; return 1; };
+                    const getWeight = (p) => {
+                        if (p.status === 'finished') return 4;
+                        if (p.status === 'cancelled') return 3; 
+                        if (p.status === 'paused') return 2; 
+                        return 1; // 執行中
+                    };
                     const wA = getWeight(a); const wB = getWeight(b);
                     if (wA !== wB) return wA - wB;
-                    if (wA === 1) return b.id - a.id; 
+                    
+                    // 如果都是執行中，依照需求日期由近到遠排序
+                    if (wA === 1) {
+                        const dA = a.deadline || '9999-99-99';
+                        const dB = b.deadline || '9999-99-99';
+                        if (dA !== dB) return dA.localeCompare(dB);
+                    }
+
+                    // 其他狀態維持 ID 降序 (新的在前面)
                     return b.id - a.id; 
                 });
             }, [projects, searchTerm, filterYear, filterHandler, filterStatus]);
+
+            const getStatusStyle = (p) => {
+                if (p.status === 'finished') return { bg: 'bg-emerald-50/70', border: 'border-emerald-100', iconColor: '#059669', name: '已完成', icon: 'CheckCircle2' };
+                if (p.status === 'cancelled') return { bg: 'bg-rose-50/70', border: 'border-rose-100', iconColor: '#e11d48', name: '已取消', icon: 'XCircle' };
+                if (p.status === 'paused') return { bg: 'bg-amber-50/70', border: 'border-amber-100', iconColor: '#d97706', name: '暫停中', icon: 'PauseCircle' };
+                return { bg: 'bg-white', border: 'border-slate-200', iconColor: THEME.cyan, name: '執行中', icon: 'PlayCircle' };
+            };
 
             return (
                 <div className="min-h-screen p-4 lg:p-8 font-sans text-slate-800">
@@ -293,7 +288,7 @@
                             </div>
                             <div className="flex flex-wrap gap-2 w-full lg:w-auto justify-end">
                                 <select className="bg-slate-50 border rounded-xl px-4 py-3 text-xs font-black text-indigo-800 outline-none cursor-pointer" value={filterHandler} onChange={e=>setFilterHandler(e.target.value)}><option value="All">全部人員</option>{handlers.map(h => <option key={h} value={h}>{h}</option>)}</select>
-                                <select className="bg-slate-50 border rounded-xl px-4 py-3 text-xs font-black text-purple-800 outline-none cursor-pointer" value={filterStatus} onChange={e=>setFilterStatus(e.target.value)}><option value="All">全部案件</option><option value="InProgress">進行中</option><option value="Finished">已完成</option></select>
+                                <select className="bg-slate-50 border rounded-xl px-4 py-3 text-xs font-black text-purple-800 outline-none cursor-pointer" value={filterStatus} onChange={e=>setFilterStatus(e.target.value)}><option value="All">全部案件</option><option value="InProgress">進行中 (含暫停)</option><option value="Finished">已結案 (含取消)</option></select>
                                 <select className="bg-slate-50 border rounded-xl px-4 py-3 text-xs font-black outline-none cursor-pointer" value={filterYear} onChange={e=>setFilterYear(e.target.value)}>{DYNAMIC_YEARS.map(y => <option key={y} value={y}>{y} 年度</option>)}</select>
                                 <button onClick={() => setIsSettingOpen(true)} className="px-5 py-3 bg-slate-800 text-white rounded-xl shadow-lg hover:bg-black transition-all font-black text-xs">組織管理</button>
                                 <button onClick={()=>setIsModalOpen(true)} className="px-6 py-3 rounded-xl text-xs text-white font-black shadow-lg hover:brightness-110 whitespace-nowrap" style={{backgroundColor: THEME.purple}}>+ 新增案件</button>
@@ -306,26 +301,28 @@
                                     const stage = STAGE_CONFIG.find(s => s.id === p.stage) || STAGE_CONFIG[0];
                                     const isExp = expandedIds.has(p.id);
                                     const deptList = Array.isArray(p.dept) ? p.dept : [p.dept];
-                                    const statusObj = STATUS_OPTIONS.find(s => s.id === p.status) || STATUS_OPTIONS[0];
-                                    const isFinished = p.stage === 5;
-                                    const statusColor = isFinished ? '#10b981' : statusObj.color;
-                                    const statusText = isFinished ? '已完工' : statusObj.name;
+                                    const handlerList = getHandlers(p);
+                                    const statusStyle = getStatusStyle(p);
 
                                     return (
-                                        <div key={p.id} className="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                                        <div key={p.id} className={`${statusStyle.bg} border ${statusStyle.border} p-7 rounded-[2.5rem] shadow-sm flex flex-col h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group`}>
                                             <div className="flex justify-between items-start mb-4">
-                                                <div className="flex flex-wrap gap-1.5 max-w-[70%]">
-                                                    {deptList.map(d => <span key={d} className="px-2.5 py-1 text-white text-[10px] font-black rounded-lg uppercase tracking-wide" style={{backgroundColor: THEME.purple}}>{d}</span>)}
+                                                <div className="flex flex-wrap gap-1.5 max-w-[65%]">
+                                                    {deptList.map(d => <span key={d} className="px-2.5 py-1 text-slate-500 bg-white border border-slate-200 text-[10px] font-bold rounded-lg uppercase tracking-wide">{d}</span>)}
                                                 </div>
-                                                <div className="status-text"><span className="status-dot" style={{backgroundColor: statusColor}}></span>{statusText}</div>
+                                                <div className="flex items-center gap-1.5" style={{color: statusStyle.iconColor}}>
+                                                    <Icon name={statusStyle.icon} size={18} color={statusStyle.iconColor}/>
+                                                    <span className="text-xs font-black tracking-wide">{statusStyle.name}</span>
+                                                </div>
                                             </div>
+
                                             <div className="min-h-[4rem] text-2xl font-black text-slate-800 pr-2 leading-tight mb-2 tracking-tight">{p.title}</div>
                                             <div className="flex items-center gap-2 text-rose-500 text-xs font-bold mb-6"><Icon name="AlarmClock" size={15}/> 需求日: <span className="font-black text-sm">{p.deadline || '未定'}</span></div>
                                             <p className="text-3xl font-black mb-8 tracking-tight flex items-baseline gap-1" style={{color: THEME.purple}}><span className="text-sm opacity-50">$</span>{p.budget.toLocaleString()}</p>
                                             
                                             <div className="mb-6 flex-1">
                                                 {p.hasSubTasks && (
-                                                    <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
+                                                    <div className="bg-white/60 p-4 rounded-2xl border border-slate-200/60">
                                                         <button onClick={()=>toggleExpansion(p.id)} className="w-full py-2 rounded-xl text-[11px] font-black flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 transition-colors shadow-sm"><Icon name={isExp ? "ChevronUp" : "ListTree"} size={14} /> {isExp ? '收起詳情' : `分項工程 (${(p.tasks||[]).length})`}</button>
                                                         {isExp && (<div className="mt-4 space-y-2 animate-fade-in">{(p.tasks || []).map(t => {
                                                             const taskStage = STAGE_CONFIG.find(s=>s.id === t.stage) || STAGE_CONFIG[0];
@@ -342,10 +339,10 @@
 
                                             <div className="space-y-3 mb-6">
                                                 <div className="flex justify-between text-[11px] font-black text-slate-400 uppercase tracking-wider"><span>專案進度</span><span style={{color: stage.color}}>{stage.name}</span></div>
-                                                <div className="flex gap-1.5">{STAGE_CONFIG.map(s => <div key={s.id} className="step-bar" style={{backgroundColor: p.stage >= s.id ? s.color : '#f1f5f9', border: p.stage >= s.id ? 'none' : '1px solid #e2e8f0'}} />)}</div>
+                                                <div className="flex gap-1.5">{STAGE_CONFIG.map(s => <div key={s.id} className="step-bar" style={{backgroundColor: p.stage >= s.id ? s.color : '#cbd5e1', border: p.stage >= s.id ? 'none' : '1px solid white'}} />)}</div>
                                             </div>
-                                            <div className="mt-auto flex justify-between items-end pt-5 border-t border-slate-50">
-                                                <div className="flex flex-col"><span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">主責人員</span><span className="text-sm font-black text-slate-700">{p.handler}</span></div>
+                                            <div className="mt-auto flex justify-between items-end pt-5 border-t border-slate-200/50">
+                                                <div className="flex flex-col"><span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">主責人員</span><span className="text-sm font-black text-slate-700">{handlerList.join('、')}</span></div>
                                                 <div className="flex gap-3">
                                                     <button onClick={()=>setEditingProject(JSON.parse(JSON.stringify(p)))} className="text-xs font-black text-slate-500 hover:text-indigo-600 transition-colors">編輯</button>
                                                     <button onClick={()=>setDeleteConfirmId(p.id)} className="text-xs font-black text-rose-400 hover:text-rose-600 transition-colors">刪除</button>
@@ -366,12 +363,13 @@
                                     <div className="space-y-8">
                                         {filteredData.map(p => {
                                             const isExp = expandedIds.has(p.id);
+                                            const pHandlers = getHandlers(p);
                                             return (
                                                 <div key={p.id} className="project-row pb-8 border-b border-slate-50 last:border-0 font-bold">
                                                     <div className="flex items-center gap-8">
                                                         <div className="project-name-col w-[320px] flex-shrink-0 flex items-center gap-4">
                                                             <button onClick={()=>p.hasSubTasks && toggleExpansion(p.id)} className={`w-8 h-8 rounded-lg border flex items-center justify-center text-sm text-slate-400 hover:bg-slate-50 hover:text-slate-600 no-print transition-colors ${p.hasSubTasks ? '' : 'invisible'}`}>{isExp ? '−' : '+'}</button>
-                                                            <div className="cursor-pointer flex-1" onClick={()=>setEditingProject(JSON.parse(JSON.stringify(p)))}><div className="text-base font-black text-slate-800 hover:text-[#9B0070] transition-colors">{p.title}</div><span className="text-[10px] text-slate-400 font-bold tracking-wide">{p.handler}</span></div>
+                                                            <div className="cursor-pointer flex-1" onClick={()=>setEditingProject(JSON.parse(JSON.stringify(p)))}><div className="text-base font-black text-slate-800 hover:text-[#9B0070] transition-colors">{p.title}</div><span className="text-[10px] text-slate-400 font-bold tracking-wide">{pHandlers.join('、')}</span></div>
                                                         </div>
                                                         <div className="timeline-col flex-1 relative h-10 bg-slate-100 rounded-full overflow-hidden shadow-inner timeline-track">
                                                             {timelineDisplay === 'dual' && (<div className="absolute inset-0 opacity-50 no-print planned-bar">{['demand', 'procurement', 'contract'].map((cat, i) => (<div key={cat} className="bar-segment" style={{...calculateBar(p.planned[cat].start, p.planned[cat].end), backgroundColor: THEME.planned}}></div>))}</div>)}
@@ -449,7 +447,11 @@
                                                 <div><label className="text-[10px] block mb-2 font-black text-slate-400 uppercase tracking-wider">專案標題</label><input required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold shadow-inner outline-none focus:ring-2 focus:ring-indigo-100 transition-all" value={editingProject.title} onChange={e=>setEditingProject({...editingProject, title:e.target.value})} /></div>
                                                 <div>
                                                     <label className="text-[10px] block mb-2 font-black text-slate-400 uppercase tracking-wider">需求部門 (可複選)</label>
-                                                    <DeptSelector options={departments} selected={Array.isArray(editingProject.dept) ? editingProject.dept : [editingProject.dept]} onChange={(newDepts) => setEditingProject({...editingProject, dept: newDepts})} />
+                                                    <MultiSelector options={departments} selected={Array.isArray(editingProject.dept) ? editingProject.dept : [editingProject.dept]} onChange={(newDepts) => setEditingProject({...editingProject, dept: newDepts})} label="部門" />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] block mb-2 font-black text-slate-400 uppercase tracking-wider">採購人員 (可複選)</label>
+                                                    <MultiSelector options={handlers} selected={getHandlers(editingProject)} onChange={(newHandlers) => setEditingProject({...editingProject, handlers: newHandlers})} label="人員" />
                                                 </div>
                                                 <div className="bg-rose-50 p-5 rounded-2xl border border-rose-100"><label className="text-[10px] text-rose-500 block mb-2 font-black uppercase tracking-wider">目標需求日</label><input type="date" className="w-full bg-white border-rose-200 rounded-xl px-4 py-2.5 text-sm font-bold text-rose-700 outline-none shadow-sm" value={editingProject.deadline} onChange={e=>setEditingProject({...editingProject, deadline:e.target.value})} /></div>
                                                 <div className="flex justify-between items-center py-2 px-1">
@@ -514,7 +516,7 @@
                                                      </div>
                                                      <div className="flex gap-3 pt-2">
                                                         {STATUS_OPTIONS.map(opt => (
-                                                            <button key={opt.id} onClick={() => setEditingProject({...editingProject, status: opt.id})} className={`flex-1 py-3 rounded-xl text-xs font-black border transition-all ${editingProject.status === opt.id ? 'bg-slate-800 text-white shadow-lg' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'}`}>{opt.name}</button>
+                                                            <button key={opt.id} onClick={() => setEditingProject({...editingProject, status: opt.id})} className={`flex-1 py-3 rounded-xl text-xs font-black border transition-all ${editingProject.status === opt.id ? 'text-white shadow-lg' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'}`} style={editingProject.status === opt.id ? {backgroundColor: opt.color === THEME.cyan ? THEME.dark : opt.color} : {}}>{opt.name}</button>
                                                         ))}
                                                      </div>
                                                 </div>
@@ -585,7 +587,12 @@
                                   
                                   <div>
                                       <label className="text-[10px] block mb-2 font-black text-slate-400 uppercase tracking-wider">需求部門 (可多選)</label>
-                                      <DeptSelector options={departments} selected={newP.depts} onChange={(newDepts) => setNewP({...newP, depts: newDepts})} />
+                                      <MultiSelector options={departments} selected={newP.depts} onChange={(newDepts) => setNewP({...newP, depts: newDepts})} label="部門" />
+                                  </div>
+                                  
+                                  <div>
+                                      <label className="text-[10px] block mb-2 font-black text-slate-400 uppercase tracking-wider">採購人員 (可多選)</label>
+                                      <MultiSelector options={handlers} selected={newP.handlers} onChange={(newHandlers) => setNewP({...newP, handlers: newHandlers})} label="人員" />
                                   </div>
 
                                   <div className="bg-rose-50/60 p-5 rounded-2xl border border-rose-100"><label className="text-[10px] text-rose-400 block mb-2 font-black uppercase tracking-wider">目標需求日</label><input type="date" required className="w-full bg-white border border-rose-200 rounded-xl px-4 py-3 text-sm font-bold shadow-sm outline-none focus:border-rose-400" value={newP.deadline} onChange={e=>setNewP({...newP, deadline: e.target.value})} /></div>
