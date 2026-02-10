@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>採購專案管理系統 v48.0 - 急迫性優先排序版</title>
+    <title>採購專案管理系統 v49.0 - 雙模式專業報表版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -13,6 +13,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; color: #334155; }
         
+        /* --- 報表列印設定 (A3 橫式) --- */
         @media print {
             @page { 
                 size: A3 landscape;
@@ -42,13 +43,16 @@
                 border-radius: 0 !important;
                 background: transparent !important;
             }
+            /* 調整標題列印樣式 */
             .header-print {
                 border-bottom: 2px solid #000 !important;
                 margin-bottom: 10px !important;
                 padding-bottom: 5px !important;
                 color: #000 !important;
                 font-weight: 900 !important;
+                display: flex !important;
             }
+            /* 確保案件不被切斷 */
             .project-row { 
                 break-inside: avoid; 
                 page-break-inside: avoid; 
@@ -58,11 +62,18 @@
             }
             .text-slate-400, .text-slate-500 { color: #475569 !important; }
             .text-slate-800 { color: #000 !important; }
-            .planned-bar { display: none !important; }
+            
+            /* 列印時隱藏軌道背景，讓彩色條更突顯 */
             .timeline-track {
-                background-color: #f1f5f9 !important;
-                border: 1px solid #e2e8f0 !important;
+                background-color: transparent !important;
+                border: none !important;
                 box-shadow: none !important;
+            }
+            /* 強制顯示彩色條 */
+            .bar-segment {
+                opacity: 1 !important;
+                box-shadow: none !important; /* 列印去陰影，省墨且清晰 */
+                border: 1px solid rgba(0,0,0,0.1) !important; /* 加細框增加辨識度 */
             }
         }
 
@@ -84,18 +95,7 @@
         .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .status-badge { 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center;
-            padding: 0.35rem 0.85rem; 
-            border-radius: 0.5rem; 
-            font-size: 0.75rem; 
-            font-weight: 900; 
-            letter-spacing: 0.05em; 
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+        .status-badge { display: inline-flex; align-items: center; justify-content: center; padding: 0.35rem 0.85rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 900; letter-spacing: 0.05em; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -161,7 +161,7 @@
 
         const App = () => {
             const [projects, setProjects] = useState(() => {
-                const s = localStorage.getItem('proc_db_v48'); 
+                const s = localStorage.getItem('proc_db_v49'); 
                 if (s) return JSON.parse(s);
                 return [
                     { 
@@ -175,28 +175,16 @@
                         tasks: [{id: 201, name: '結構補強施工', stage: 4, actual: { demand: {}, procurement: {}, contract: {} }}],
                         planned: { demand: { start: '2025-09-01', end: '2025-11-30' }, procurement: { start: '2025-12-01', end: '2026-03-01' }, contract: { start: '2026-03-02', end: '2026-12-31' } },
                         actual: { demand: { start: '2025-09-10', end: '2025-11-25' }, procurement: { start: '2025-12-05', end: '2026-02-28' }, contract: { start: '2026-03-10', end: '' } }
-                    },
-                    {
-                        id: 1715430003, title: '全校雙語教學教材聯合採購', year: '2026', deadline: '2026-02-20', budget: 850000, dept: ['教務處'], handlers: ['張小美'], stage: 5, status: 'finished', hasSubTasks: false, remarks: '已結案',
-                        tasks: [],
-                        planned: { demand: { start: '', end: '' }, procurement: { start: '', end: '' }, contract: { start: '', end: '' } },
-                        actual: { demand: { start: '', end: '' }, procurement: { start: '', end: '' }, contract: { start: '', end: '' } }
-                    },
-                    {
-                        id: 1715433004, title: '夏季校園冷氣清洗保養', year: '2026', deadline: '2026-05-31', budget: 450000, dept: ['總務部'], handlers: ['林大為'], stage: 1, status: 'paused', hasSubTasks: false, remarks: '預算凍結中',
-                        tasks: [],
-                        planned: { demand: { start: '', end: '' }, procurement: { start: '', end: '' }, contract: { start: '', end: '' } },
-                        actual: { demand: { start: '', end: '' }, procurement: { start: '', end: '' }, contract: { start: '', end: '' } }
                     }
                 ];
             });
 
-            const [departments, setDepartments] = useState(() => JSON.parse(localStorage.getItem('depts_v48')) || ['資訊部', '總務部', '營繕組', '教務處', '學務處', '研發部']);
-            const [handlers, setHandlers] = useState(() => JSON.parse(localStorage.getItem('handlers_v48')) || ['系統管理員', '林大為', '張小美']);
+            const [departments, setDepartments] = useState(() => JSON.parse(localStorage.getItem('depts_v49')) || ['資訊部', '總務部', '營繕組', '教務處', '學務處', '研發部']);
+            const [handlers, setHandlers] = useState(() => JSON.parse(localStorage.getItem('handlers_v49')) || ['系統管理員', '林大為', '張小美']);
             
-            useEffect(() => localStorage.setItem('proc_db_v48', JSON.stringify(projects)), [projects]);
-            useEffect(() => localStorage.setItem('depts_v48', JSON.stringify(departments)), [departments]);
-            useEffect(() => localStorage.setItem('handlers_v48', JSON.stringify(handlers)), [handlers]);
+            useEffect(() => localStorage.setItem('proc_db_v49', JSON.stringify(projects)), [projects]);
+            useEffect(() => localStorage.setItem('depts_v49', JSON.stringify(departments)), [departments]);
+            useEffect(() => localStorage.setItem('handlers_v49', JSON.stringify(handlers)), [handlers]);
 
             const [viewMode, setViewMode] = useState('list');
             const [isModalOpen, setIsModalOpen] = useState(false);
@@ -205,6 +193,10 @@
             const [expandedIds, setExpandedIds] = useState(new Set());
             const [deleteConfirmId, setDeleteConfirmId] = useState(null);
             const [timelineDisplay, setTimelineDisplay] = useState('dual');
+            
+            // 新增：列印模式狀態 ('none', 'planned', 'actual')
+            const [printMode, setPrintMode] = useState('none');
+
             const [searchTerm, setSearchTerm] = useState('');
             const [filterYear, setFilterYear] = useState(CURRENT_YEAR_NUM.toString());
             const [filterHandler, setFilterHandler] = useState('All');
@@ -221,6 +213,23 @@
             const removeSubTask = (id) => setEditingProject(prev => ({...prev, tasks: prev.tasks.filter(t => t.id !== id)}));
             const handleSaveEdit = () => { setProjects(prev => prev.map(p => p.id === editingProject.id ? editingProject : p)); setEditingProject(null); };
             const handleAddProject = (e) => { e.preventDefault(); if (newP.depts.length === 0) { alert('請至少選擇一個部門'); return; } if (newP.handlers.length === 0) { alert('請至少選擇一位採購人員'); return; } const p = { id: Date.now(), ...newP, budget: Number(newP.budget) || 0, dept: newP.depts, handlers: newP.handlers, stage: 1, status: 'normal', tasks: [], planned: { demand: {start: newP.p_demandS, end: newP.p_demandE}, procurement: {start: newP.p_procS, end: newP.p_procE}, contract: {start: newP.p_contS, end: newP.p_contE} }, actual: { demand: {start: '', end: ''}, procurement: {start: '', end: ''}, contract: {start: '', end: ''} } }; setProjects([p, ...projects]); setIsModalOpen(false); setNewP({ title: '', budget: '', deadline: '', handlers: [], year: CURRENT_YEAR_NUM.toString(), depts: [], hasSubTasks: false, p_demandS: '', p_demandE: '', p_procS: '', p_procE: '', p_contS: '', p_contE: '' }); };
+            
+            // --- 觸發列印邏輯 ---
+            const handlePrint = (mode) => {
+                setPrintMode(mode); // 設定列印模式 (planned / actual)
+            };
+            
+            // 當 printMode 改變時，觸發列印，印完後重置
+            useEffect(() => {
+                if (printMode !== 'none') {
+                    // 給一點時間讓 React 重新渲染 DOM
+                    setTimeout(() => {
+                        window.print();
+                        setPrintMode('none'); // 列印對話框關閉後，恢復原狀 (瀏覽器行為可能會有些許不同)
+                    }, 200);
+                }
+            }, [printMode]);
+
             const calculateBar = (start, end) => { if (!start || !end) return { display: 'none' }; const vy = parseInt(filterYear); const sd = new Date(start), ed = new Date(end), ys = new Date(`${vy}-01-01`), ye = new Date(`${vy}-12-31`); if (ed < ys || sd > ye) return { display: 'none' }; const sp = Math.max(0, (sd - ys) / (1000 * 60 * 60 * 24)); const ep = Math.min(365, (ed - ys) / (1000 * 60 * 60 * 24) + 1); return { left: `${(sp / 365) * 100}%`, width: `${((ep - sp) / 365) * 100}%` }; };
 
             const filteredData = useMemo(() => {
@@ -237,26 +246,16 @@
                     else if (filterStatus === 'Finished') matchStatus = ['cancelled', 'finished'].includes(p.status);
                     return isWithinYear && matchSearch && matchHandler && matchStatus;
                 });
-
-                // 排序：1.執行中(按需求日Asc) -> 2.暫停 -> 3.取消 -> 4.已完工
                 return filtered.sort((a, b) => {
                     const getWeight = (p) => {
                         if (p.status === 'finished') return 4;
                         if (p.status === 'cancelled') return 3; 
                         if (p.status === 'paused') return 2; 
-                        return 1; // 執行中
+                        return 1; 
                     };
                     const wA = getWeight(a); const wB = getWeight(b);
                     if (wA !== wB) return wA - wB;
-                    
-                    // 如果都是執行中，依照需求日期由近到遠排序
-                    if (wA === 1) {
-                        const dA = a.deadline || '9999-99-99';
-                        const dB = b.deadline || '9999-99-99';
-                        if (dA !== dB) return dA.localeCompare(dB);
-                    }
-
-                    // 其他狀態維持 ID 降序 (新的在前面)
+                    if (wA === 1) { const dA = a.deadline || '9999-99-99'; const dB = b.deadline || '9999-99-99'; if (dA !== dB) return dA.localeCompare(dB); }
                     return b.id - a.id; 
                 });
             }, [projects, searchTerm, filterYear, filterHandler, filterStatus]);
@@ -267,6 +266,9 @@
                 if (p.status === 'paused') return { bg: 'bg-amber-50/70', border: 'border-amber-100', iconColor: '#d97706', name: '暫停中', icon: 'PauseCircle' };
                 return { bg: 'bg-white', border: 'border-slate-200', iconColor: THEME.cyan, name: '執行中', icon: 'PlayCircle' };
             };
+
+            // 列印時標題動態變更
+            const printTitle = printMode === 'planned' ? '年度計畫期程報表 (Planned)' : printMode === 'actual' ? '年度實際執行報表 (Actual)' : '年度採購期程軌跡';
 
             return (
                 <div className="min-h-screen p-4 lg:p-8 font-sans text-slate-800">
@@ -315,11 +317,9 @@
                                                     <span className="text-xs font-black tracking-wide">{statusStyle.name}</span>
                                                 </div>
                                             </div>
-
                                             <div className="min-h-[4rem] text-2xl font-black text-slate-800 pr-2 leading-tight mb-2 tracking-tight">{p.title}</div>
                                             <div className="flex items-center gap-2 text-rose-500 text-xs font-bold mb-6"><Icon name="AlarmClock" size={15}/> 需求日: <span className="font-black text-sm">{p.deadline || '未定'}</span></div>
                                             <p className="text-3xl font-black mb-8 tracking-tight flex items-baseline gap-1" style={{color: THEME.purple}}><span className="text-sm opacity-50">$</span>{p.budget.toLocaleString()}</p>
-                                            
                                             <div className="mb-6 flex-1">
                                                 {p.hasSubTasks && (
                                                     <div className="bg-white/60 p-4 rounded-2xl border border-slate-200/60">
@@ -336,7 +336,6 @@
                                                     </div>
                                                 )}
                                             </div>
-
                                             <div className="space-y-3 mb-6">
                                                 <div className="flex justify-between text-[11px] font-black text-slate-400 uppercase tracking-wider"><span>專案進度</span><span style={{color: stage.color}}>{stage.name}</span></div>
                                                 <div className="flex gap-1.5">{STAGE_CONFIG.map(s => <div key={s.id} className="step-bar" style={{backgroundColor: p.stage >= s.id ? s.color : '#cbd5e1', border: p.stage >= s.id ? 'none' : '1px solid white'}} />)}</div>
@@ -356,14 +355,38 @@
                             <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 overflow-x-auto animate-fade-in print-area">
                                 <div className="min-w-[1200px] print-area">
                                     <div className="flex justify-between items-end mb-12 border-b border-slate-100 pb-8 header-print">
-                                        <div><h4 className="text-2xl font-black text-slate-800 tracking-tight">年度採購期程軌跡</h4><div className="flex gap-2 mt-4 no-print"><button onClick={()=>setTimelineDisplay('dual')} className={`px-5 py-2 rounded-xl text-xs font-black border transition-all ${timelineDisplay==='dual' ? 'bg-slate-900 text-white border-slate-900 shadow-lg' : 'text-slate-400 border-transparent hover:bg-slate-50'}`}>計畫/實際對比</button><button onClick={()=>setTimelineDisplay('actual')} className={`px-5 py-2 rounded-xl text-xs font-black border transition-all ${timelineDisplay==='actual' ? 'bg-slate-900 text-white border-slate-900 shadow-lg' : 'text-slate-400 border-transparent hover:bg-slate-50'}`}>僅顯示實際</button></div></div>
-                                        <button onClick={()=>window.print()} className="no-print flex items-center gap-3 px-6 py-3 bg-slate-800 text-white rounded-xl text-xs font-black hover:bg-black transition-all shadow-lg"><Icon name="Printer" size={18}/> 匯出報表 (A3)</button>
+                                        <div>
+                                            {/* 列印時動態顯示標題 */}
+                                            <h4 className="text-2xl font-black text-slate-800 tracking-tight">{printTitle}</h4>
+                                            {/* 報表匯出按鈕區 */}
+                                            <div className="flex gap-2 mt-4 no-print">
+                                                <div className="bg-slate-100 p-1 rounded-xl flex gap-1 border border-slate-200 mr-4">
+                                                    <button onClick={()=>setTimelineDisplay('dual')} className={`px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all ${timelineDisplay==='dual' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>螢幕: 對比模式</button>
+                                                    <button onClick={()=>setTimelineDisplay('actual')} className={`px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all ${timelineDisplay==='actual' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>螢幕: 僅實際</button>
+                                                </div>
+                                                {/* 雙重匯出按鈕 */}
+                                                <button onClick={()=>handlePrint('planned')} className="flex items-center gap-2 px-5 py-2 bg-slate-800 text-white rounded-xl text-xs font-black hover:bg-black transition-all shadow-lg"><Icon name="FileText" size={16}/> 匯出預估</button>
+                                                <button onClick={()=>handlePrint('actual')} className="flex items-center gap-2 px-5 py-2 bg-slate-800 text-white rounded-xl text-xs font-black hover:bg-black transition-all shadow-lg"><Icon name="Printer" size={16}/> 匯出實際</button>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="flex mb-6 px-4 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] header-print"><div className="project-name-col w-[320px]">專案名稱 / 主責</div><div className="timeline-col flex-1 grid grid-cols-12 text-center border-l border-slate-100">{MONTHS.map(m => <div key={m}>{m}</div>)}</div></div>
                                     <div className="space-y-8">
                                         {filteredData.map(p => {
                                             const isExp = expandedIds.has(p.id);
                                             const pHandlers = getHandlers(p);
+                                            
+                                            // --- 智慧渲染邏輯 ---
+                                            // 1. 若是列印模式 (printMode !== 'none')，只渲染該模式的資料
+                                            // 2. 若是螢幕模式，根據 timelineDisplay 渲染
+                                            
+                                            const isPrinting = printMode !== 'none';
+                                            
+                                            // 決定顯示哪種 Bar (螢幕邏輯 or 列印邏輯)
+                                            // 若列印計畫：顯示 Plan bar (且要飽和色)，隱藏 Actual bar
+                                            // 若列印實際：隱藏 Plan bar，顯示 Actual bar
+                                            // 若螢幕顯示：Plan bar (灰) + Actual bar (色)
+                                            
                                             return (
                                                 <div key={p.id} className="project-row pb-8 border-b border-slate-50 last:border-0 font-bold">
                                                     <div className="flex items-center gap-8">
@@ -372,19 +395,61 @@
                                                             <div className="cursor-pointer flex-1" onClick={()=>setEditingProject(JSON.parse(JSON.stringify(p)))}><div className="text-base font-black text-slate-800 hover:text-[#9B0070] transition-colors">{p.title}</div><span className="text-[10px] text-slate-400 font-bold tracking-wide">{pHandlers.join('、')}</span></div>
                                                         </div>
                                                         <div className="timeline-col flex-1 relative h-10 bg-slate-100 rounded-full overflow-hidden shadow-inner timeline-track">
-                                                            {timelineDisplay === 'dual' && (<div className="absolute inset-0 opacity-50 no-print planned-bar">{['demand', 'procurement', 'contract'].map((cat, i) => (<div key={cat} className="bar-segment" style={{...calculateBar(p.planned[cat].start, p.planned[cat].end), backgroundColor: THEME.planned}}></div>))}</div>)}
-                                                            <div className={`absolute w-full flex items-center ${timelineDisplay === 'dual' ? 'inset-y-2' : 'inset-y-1'}`}>
-                                                                {['demand', 'procurement', 'contract'].map((cat, i) => (<div key={cat} className="bar-segment shadow-md rounded-full" style={{...calculateBar(p.actual[cat].start, p.actual[cat].end), backgroundColor: [THEME.cyan, THEME.purple, THEME.blue][i], opacity: 1}}></div>))}
-                                                            </div>
+                                                            {/* 計畫條渲染 (背景層/或列印時的主層) */}
+                                                            {/* 條件：螢幕且對比模式 OR 列印且是計畫模式 */}
+                                                            {((!isPrinting && timelineDisplay === 'dual') || (isPrinting && printMode === 'planned')) && (
+                                                                <div className={`absolute w-full flex items-center ${isPrinting ? 'inset-y-1' : 'inset-0 opacity-50'}`}>
+                                                                    {['demand', 'procurement', 'contract'].map((cat, i) => (
+                                                                        <div key={cat} className="bar-segment rounded-full" 
+                                                                             style={{
+                                                                                 ...calculateBar(p.planned[cat].start, p.planned[cat].end), 
+                                                                                 // 若列印計畫：使用飽和色；若螢幕顯示：使用淺灰
+                                                                                 backgroundColor: (isPrinting && printMode === 'planned') ? [THEME.cyan, THEME.purple, THEME.blue][i] : THEME.planned
+                                                                             }}>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                            
+                                                            {/* 實際條渲染 (前景層) */}
+                                                            {/* 條件：螢幕顯示 OR 列印且是實際模式 */}
+                                                            {((!isPrinting) || (isPrinting && printMode === 'actual')) && (
+                                                                <div className={`absolute w-full flex items-center ${(!isPrinting && timelineDisplay === 'dual') ? 'inset-y-2' : 'inset-y-1'}`}>
+                                                                    {['demand', 'procurement', 'contract'].map((cat, i) => (
+                                                                        <div key={cat} className="bar-segment shadow-md rounded-full" 
+                                                                             style={{
+                                                                                 ...calculateBar(p.actual[cat].start, p.actual[cat].end), 
+                                                                                 backgroundColor: [THEME.cyan, THEME.purple, THEME.blue][i], 
+                                                                                 opacity: 1
+                                                                             }}>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
+                                                    
+                                                    {/* 分項展開邏輯 (同上) */}
                                                     {isExp && p.tasks?.map(t => {
                                                         const taskStage = STAGE_CONFIG.find(s=>s.id === t.stage) || STAGE_CONFIG[0];
                                                         return (
                                                             <div key={t.id} className="flex items-center gap-8 pl-12 mt-4 animate-fade-in">
                                                                 <div className="project-name-col w-[288px] text-xs font-bold text-slate-500 border-l-2 border-slate-200 pl-4 flex items-center gap-2"><span>{t.name}</span><span className="text-[9px] px-2 py-0.5 rounded text-white tracking-wider" style={{backgroundColor: taskStage.color}}>{taskStage.badge}</span></div>
                                                                 <div className="timeline-col flex-1 relative h-6 bg-slate-50 rounded-full overflow-hidden border border-slate-100/50 timeline-track">
-                                                                    {['demand', 'procurement', 'contract'].map((cat, i) => (<div key={cat} className="bar-segment rounded-full" style={{...calculateBar(t.actual?.[cat]?.start, t.actual?.[cat]?.end), backgroundColor: [THEME.cyan, THEME.purple, THEME.blue][i], opacity: 0.7}}></div>))}
+                                                                    {((!isPrinting && timelineDisplay === 'dual') || (isPrinting && printMode === 'planned')) && (
+                                                                         // 這裡假設分項沒有輸入計畫時間，若有可比照上方邏輯。目前僅顯示實際。
+                                                                         // 若需顯示分項的實際時間(作為列印計畫的替代? 通常分項只看實際) -> 暫維持顯示實際
+                                                                         // 修正：列印計畫時，分項若無計畫資料則不顯示條，或顯示實際? 依邏輯通常分項追蹤實際。
+                                                                         // 這裡簡單處理：列印計畫時隱藏分項的實際條，除非有分項計畫資料(目前結構無)。
+                                                                         // 為避免空白，列印計畫時分項條隱藏。
+                                                                         (isPrinting && printMode === 'planned') ? null : null 
+                                                                    )}
+
+                                                                    {((!isPrinting) || (isPrinting && printMode === 'actual')) && (
+                                                                        ['demand', 'procurement', 'contract'].map((cat, i) => (
+                                                                            <div key={cat} className="bar-segment rounded-full" style={{...calculateBar(t.actual?.[cat]?.start, t.actual?.[cat]?.end), backgroundColor: [THEME.cyan, THEME.purple, THEME.blue][i], opacity: 0.7}}></div>
+                                                                        ))
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         );
