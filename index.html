@@ -65,7 +65,7 @@ body{font-family:'Noto Sans TC','Inter',sans-serif;background:var(--bg);color:va
 .cd-l{font-size:9px;color:rgba(42,24,16,.55);margin-top:1px;letter-spacing:.5px;text-transform:uppercase}
 
 /* ── MAIN ── */
-.main{margin-top:var(--hdr-h);margin-bottom:var(--nav-h);min-height:calc(100vh - var(--hdr-h) - var(--nav-h))}
+.main{margin-top:var(--hdr-h);margin-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));min-height:calc(100vh - var(--hdr-h) - var(--nav-h))}
 .sec{display:none;padding:14px 14px 8px;animation:fu .25s ease}
 .sec.active{display:block}
 @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -144,7 +144,7 @@ body{font-family:'Noto Sans TC','Inter',sans-serif;background:var(--bg);color:va
 .dt-btn-l{display:block;font-size:9.5px;margin-top:2px;color:var(--t3)}
 .dt-btn.active .dt-btn-d,.dt-btn.active .dt-btn-l{color:var(--nv)}
 /* Day panel */
-.day-panel{display:none;padding:12px 14px 8px;animation:fu .25s ease}
+.day-panel{display:none;padding:12px 14px 32px;animation:fu .25s ease}
 .day-panel.active{display:block}
 .dp-head{background:var(--uk);border-radius:16px;padding:15px 17px;margin-bottom:10px}
 .dp-tag{font-size:9px;font-weight:700;color:rgba(28,43,74,.55);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px}
@@ -462,6 +462,24 @@ body{font-family:'Noto Sans TC','Inter',sans-serif;background:var(--bg);color:va
 .flex-box{background:rgba(239,187,36,.07);border:1px solid rgba(239,187,36,.3);border-radius:10px;padding:10px 13px;margin-top:8px;font-size:11.5px;color:var(--t2);line-height:2}
 .flex-box ul{margin:3px 0 0 0;padding-left:16px}
 .act-lbl{font-size:10.5px;font-weight:700;color:var(--t3);letter-spacing:.3px;margin-bottom:3px}
+.ok-tip{background:var(--ok-l);border-left:3px solid var(--ok);border-radius:0 10px 10px 0;padding:10px 13px;font-size:12.5px;color:var(--t2);margin-bottom:9px;line-height:1.7}
+.ok-tip strong{color:var(--ok)}
+/* ── Transport compact chip ── */
+.tl-item.is-tr .tl-co{padding-bottom:8px}
+.tl-item.is-tr .tl-ln{background:repeating-linear-gradient(to bottom,var(--bd) 0,var(--bd) 4px,transparent 4px,transparent 8px)!important}
+.tl-dt-tr{width:8px;height:8px;border-radius:50%;background:rgba(180,180,180,.55);border:2px solid var(--wh);box-shadow:0 0 0 1.5px rgba(180,180,180,.4);flex-shrink:0;margin-top:4px}
+.tl-tm-tr{color:var(--t3)!important;font-size:10px!important}
+.tr-chip{display:flex;align-items:flex-start;gap:8px;background:var(--bg);border:1.5px solid var(--bd);border-radius:12px;padding:6px 12px}
+.tr-chip-ic{font-size:15px;flex-shrink:0;line-height:1.4}
+.tr-chip-body{flex:1;min-width:0}
+.tr-chip-nm{font-size:12px;font-weight:700;color:var(--nv)}
+.tr-chip-meta{font-size:11px;color:var(--t3);margin-top:2px;line-height:1.5}
+.ci-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px;vertical-align:middle}
+.ci-badge.food{background:rgba(200,90,42,.12);color:var(--tr);border:1px solid rgba(200,90,42,.25)}
+.ci-badge.train{background:var(--sb-l);color:var(--sb);border:1px solid rgba(58,107,158,.25)}
+.ci-badge.activity{background:var(--ok-l);color:var(--ok);border:1px solid rgba(46,138,92,.2)}
+.ci-badge.pending{background:rgba(185,185,185,.15);color:#999;border:1px solid rgba(185,185,185,.3)}
+.ci-badge.rec{background:rgba(61,122,94,.12);color:var(--sg);border:1px solid rgba(61,122,94,.25)}
 </style>
 </head>
 <body>
@@ -832,7 +850,7 @@ body{font-family:'Noto Sans TC','Inter',sans-serif;background:var(--bg);color:va
     <div class="card">
       <div style="font-size:13.5px;font-weight:700;color:var(--nv);margin-bottom:12px">🏨 住宿資訊</div>
       <div class="ht-r"><span style="font-size:26px">🏨</span><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--nv)">NewCZ Haeundae Residence</div><div style="font-size:11px;color:var(--t3);margin-top:2px">9/16 – 9/19（3晚）· 海雲台區</div></div><a class="map-btn" href="https://map.naver.com/p/search/NewCZ%20Haeundae%20Residence" target="_blank">📍 地圖</a></div>
-      <div class="ht-r"><span style="font-size:26px">🏨</span><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--nv)">南浦洞住宿</div><div style="font-size:11px;color:var(--t3);margin-top:2px">9/19 – 9/21（2晚）· 南浦洞周邊</div></div><a class="map-btn" href="https://map.naver.com/p/search/%EB%82%A8%ED%8F%AC%EB%8F%99" target="_blank">📍 地圖</a></div>
+      <div class="ht-r"><span style="font-size:26px">🏨</span><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--nv)">Hotel Ground27</div><div style="font-size:11px;color:var(--t3);margin-top:2px">9/19 – 9/21（2晚）· Jung-gu・中區南浦洞</div></div><a class="map-btn" href="https://map.naver.com/p/search/Hotel%20Ground27" target="_blank">📍 地圖</a></div>
     </div>
   </div>
 
@@ -850,8 +868,8 @@ body{font-family:'Noto Sans TC','Inter',sans-serif;background:var(--bg);color:va
     <div class="card">
       <div style="font-size:13.5px;font-weight:700;color:var(--nv);margin-bottom:12px">🚌 機場交通路線</div>
       <div class="rt"><strong>金海機場 → 海雲台</strong><br>輕軌至沙上站 → 橘線至海雲台站，約 65 分 · ₩2,700<br>計程車 40 分 · ₩40,000–55,000</div>
-      <div class="rt"><strong>海雲台 → 西面（9/19 轉住）</strong><br>橘線至西面站，約 30 分 · ₩1,800</div>
-      <div class="rt"><strong>西面 → 金海機場（9/21 回程）</strong><br>橘線至沙上站 → 輕軌，約 60 分</div>
+      <div class="rt"><strong>海雲台 → 南浦洞 Hotel Ground27（9/19 轉住）</strong><br>2號線至西面 → 換1號線至南浦站，約 40 分 · ₩1,800<br>計程車 約 40 分 · ₩25,000–35,000（含行李推薦）</div>
+      <div class="rt"><strong>南浦洞 → 金海機場（9/21 回程）</strong><br>1號線至西面 → 換2號線至沙上站 → 輕軌，約 65 分<br>計程車 約 35 分 · ₩30,000–40,000</div>
     </div>
     <div class="card">
       <div style="font-size:13.5px;font-weight:700;color:var(--nv);margin-bottom:10px">📞 緊急聯絡</div>
@@ -868,8 +886,8 @@ body{font-family:'Noto Sans TC','Inter',sans-serif;background:var(--bg);color:va
 
   <div class="ipane" id="ip3">
     <a class="tlk" href="https://map.naver.com/p/search/%ED%95%B4%EC%9A%B4%EB%8C%80%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5" target="_blank"><span class="tlk-ic">🏖️</span><div><div class="tlk-nm">海雲台・東白島</div><div class="tlk-sb">第 1–3 晚飯店周邊</div></div><span class="tlk-ar">›</span></a>
-    <a class="tlk" href="https://map.naver.com/p/search/%EC%84%9C%EB%A9%B4" target="_blank"><span class="tlk-ic">🏙️</span><div><div class="tlk-nm">西面商圈</div><div class="tlk-sb">第 4–5 晚飯店周邊</div></div><span class="tlk-ar">›</span></a>
-    <a class="tlk" href="https://map.naver.com/p/search/%EB%82%A8%ED%8F%AC%EB%8F%99%20%EB%B6%80%EC%82%B0" target="_blank"><span class="tlk-ic">🎬</span><div><div class="tlk-nm">南浦洞・BIFF廣場</div><div class="tlk-sb">國際市場・釜山塔</div></div><span class="tlk-ar">›</span></a>
+    <a class="tlk" href="https://map.naver.com/p/search/%EC%84%9C%EB%A9%B4" target="_blank"><span class="tlk-ic">🏙️</span><div><div class="tlk-nm">西面商圈</div><div class="tlk-sb">逛街・美食・Olive Young 旗艦店</div></div><span class="tlk-ar">›</span></a>
+    <a class="tlk" href="https://map.naver.com/p/search/%EB%82%A8%ED%8F%AC%EB%8F%99%20%EB%B6%80%EC%82%B0" target="_blank"><span class="tlk-ic">🎬</span><div><div class="tlk-nm">南浦洞・BIFF廣場</div><div class="tlk-sb">第 4–5 晚 Hotel Ground27・國際市場・釜山塔</div></div><span class="tlk-ar">›</span></a>
     <a class="tlk" href="https://map.naver.com/p/search/%EA%B0%90%EC%B2%9C%EB%AC%B8%ED%99%94%EB%A7%88%EC%9D%84" target="_blank"><span class="tlk-ic">🎨</span><div><div class="tlk-nm">甘川文化村</div><div class="tlk-sb">彩色山城・打卡聖地</div></div><span class="tlk-ar">›</span></a>
     <a class="tlk" href="https://map.naver.com/p/search/%ED%83%9C%EC%A2%85%EB%8C%80" target="_blank"><span class="tlk-ic">🌊</span><div><div class="tlk-nm">太宗台</div><div class="tlk-sb">懸崖海景・遊覽小火車</div></div><span class="tlk-ar">›</span></a>
     <a class="tlk" href="https://map.naver.com/p/search/%EC%86%A1%EB%8F%84%ED%95%B4%EC%83%81%EC%BC%80%EC%9D%B4%EB%B8%94%EC%B9%B4" target="_blank"><span class="tlk-ic">🚠</span><div><div class="tlk-nm">松島海上纜車</div><div class="tlk-sb">透明車廂・絕景必訪</div></div><span class="tlk-ar">›</span></a>
@@ -1030,54 +1048,68 @@ body{font-family:'Noto Sans TC','Inter',sans-serif;background:var(--bg);color:va
 <script>
 // ═══ DATA ═══════════════════════════════════════
 const ITIN=[
-  {day:1,date:'09/16',dow:'三',title:'抵達・海雲台',hotel:'NewCZ Haeundae Residence',acts:[
-    {t:'11:30',n:'金海機場落地（JX900）→ 計程車 → NewCZ Check-in',d:'出關約40分 → 12:20出門・2台計程車（₩40,000–50,000/台）・約13:10到',q:'김해국제공항',tr:true},
-    {t:'14:00',n:'海雲台海水浴場散步',d:'步行5分・免費・孩子玩沙踏浪・第一天最輕鬆的選擇 🏖️',q:'해운대해수욕장',kids:['🏖️ 沙灘玩耍','♿ 無障礙通道']},
-    {t:'19:00',n:'晚餐：海雲台周邊',d:'生魚片・烤肉・海鮮鍋',q:'해운대 음식점'},
-  ]},
-  {day:2,date:'09/17',dow:'四',title:'青沙浦・機張樂天',hotel:'NewCZ Haeundae Residence',acts:[
-    {t:'09:30',n:'天空膠囊列車 尾浦→青沙浦',d:'每廂最多4人・₩15,000/廂・12人分3組・搭車時開通 Busan Pass 🚃 另購票・8月中搶・7歲以下共乘',q:'해운대블루라인파크',tr:true,kids:['8月中搶票']},
-    {t:'11:00',n:'青沙浦午餐',d:'現烤扇貝・海景咖啡廳・12:00前吃完，留時間給機張',q:'청사포'},
-    {t:'12:00',n:'青沙浦直搭計程車→機張',d:'約14km・20分・₩10,000・比從尾浦出發省40分',q:null,tr:true,kids:['路線關鍵']},
-    {t:'12:20',n:'Skyline Luge 斜坡滑車',d:'4條路線2.4km・平日不排隊・Pass免費2次・約1.5小時玩完 🛷',q:'스카이라인루지 기장',kids:['Pass免費','85cm以下不可搭']},
-    {t:'14:00',n:'樂天世界冒險樂園 機張',d:'步行5分即達・Pass免費入場・玩到19:00共5小時・童話城堡主題各年齡層適合 🎡',q:'롯데월드 어드벤처 부산',kids:['Pass免費','各年齡適合']},
-    {t:'19:30',n:'晚餐：機張周邊或回海雲台',d:'園區周邊覓食，或搭車回海雲台',q:'기장 맛집'},
-  ]},
-  {day:3,date:'09/18',dow:'五',title:'影島全攻略・Arte Museum',hotel:'NewCZ Haeundae Residence',
-   note:'📍 白淺灘・海女村・Arte Museum 全在影島，同島串聯不走回頭路',
-   tips:[{type:'tip',text:'影島一整天串聯：白淺灘 → 海女村 → Arte Museum 步行範圍，不需跨區移動。下午泡完汗蒸幕再回海雲台，輕鬆收尾。'}],
+  {day:1,date:'09/16',dow:'三',title:'抵達・海雲台',hotel:'NewCZ Haeundae Residence',
+   note:'今日路線：金海機場 → 海雲台 Check-in → 海水浴場 → 味贊王燒肉',
    acts:[
-    {t:'09:30',n:'白淺灘文化村',d:'釜山版聖托里尼・免費入場・平日人少最美・藍白小巷打卡 🎨',q:'흰여울문화마을',kids:['免費入場','注意孩子腳力']},
-    {t:'12:00',n:'影島海女村午餐',d:'現撈海鮮・比鄰其便宜1/3・菜單有中文 🦞 週一公休（9/18五 OK）',q:'영도 해녀촌'},
-    {t:'14:00',n:'Arte Museum 釜山',d:'影島區海洋路247號街29・沉浸式數位藝術・約1.5–2小時・同島步行或車5分可達',q:'아르떼뮤지엄 부산',isNew:true,kids:['沉浸式體驗','親子友善']},
-    {t:'16:30',n:'Club D Oasis 汗蒸幕',d:'LCT大樓・大人Pass免費4小時・無敵海景溫泉・週二公休（9/18五 OK）♨️',q:'클럽디오아시스',kids:['Pass免費4hr','無年齡限制']},
+    {t:'11:30',n:'金海機場落地（JX900）',d:'2台計程車・₩40,000–50,000/台・約13:10抵達NewCZ',q:'김해국제공항',tr:true},
+    {t:'14:00',n:'海雲台海水浴場散步',d:'步行5分・免費・孩子踏沙踏浪・第一天最輕鬆的選擇',q:'해운대해수욕장',kids:['沙灘玩耍','無障礙通道']},
+    {t:'19:00',n:'晚餐：味贊王燒肉',d:'海雲台人氣烤肉・五花肉・生肉片・12人建議提前訂位',q:'미찬왕 해운대',badge:'🥩 燒肉',badgeType:'food'},
   ]},
-  {day:4,date:'09/19',dow:'六',title:'南浦洞 + 廣安里無人機秀 ★',hotel:'南浦洞住宿 Check-in',
-   sub:'週六限定',
-   note:'🔵 南浦洞→廣安里：地鐵2號線約20分，建議19:30出發',
-   tips:[
-     {type:'warn',text:'交通提醒：廣安里週六19:00起周邊開始塞車，強烈建議搭地鐵2號線至廣安站，步行約13分可達最佳觀賞點。勿搭計程車。'},
-     {type:'warn',text:'天氣風險：強風或大雨可能臨時取消，出發前確認官網公告。'},
-   ],
+  {day:2,date:'09/17',dow:'四',title:'機張・膠囊列車',hotel:'NewCZ Haeundae Residence',
+   note:'今日路線：海雲台 → 機張（Skyline Luge＋樂天世界）→ 青沙浦（膠囊列車出發）→ 尾浦 → 晚餐',
+   tips:[{type:'ok',text:'方向確認：KKday上有「青沙浦出發A」方案，青沙浦→尾浦方向可訂。機張→青沙浦只需10-15分計程車，動線完全不走回頭路。'}],
    acts:[
-    {t:'11:00',n:'NewCZ 退房',d:'計程車前往南浦洞，行李直接Check-in或寄放',q:null},
-    {t:'12:00',n:'南浦洞住宿 Check-in',d:'放置行李後步行可達周邊景點',q:'남포동',sw:true},
-    {t:'13:00',n:'午餐：札嘎其市場',d:'現撈海鮮・韓國最大海鮮市場・2樓餐廳可料理樓下買的海鮮 🦀',q:'자갈치시장'},
-    {t:'15:00',n:'南浦洞・光復路逛街',d:'年輕潮流街區・文創小物・平價美妝，步行即達',q:'광복거리'},
-    {t:'18:30',n:'廣安里晚餐',d:'沿岸景觀餐廳・烤肉・海鮮・提早卡位，交通管制前入場',q:'광안리해수욕장'},
-    {t:'20:00',n:'廣安里 M 無人機燈光秀（第一場）',d:'1,000台無人機・約10分鐘・免費・廣安大橋為背景・建議地鐵廣安站步行前往，交通管制期間禁止計程車',q:'광안리해수욕장',highlight:true,kids:['週六限定','🆓 免費','強風可能取消']},
-    {t:'22:00',n:'（可選）第二場無人機秀',d:'如體力允許可留下來看第二場，結束後地鐵回南浦洞',q:null},
+    {t:'09:00',n:'海雲台→機張',d:'約20分・₩15,000・海雲台東側直行機張',q:'기장군',tr:true},
+    {t:'09:30',n:'Skyline Luge 斜坡滑車',d:'4條路線2.4km・Pass免費2次・約1.5小時・平日不排隊',q:'스카이라인루지 기장',kids:['Pass免費','85cm以下不可搭']},
+    {t:'11:30',n:'樂天世界冒險樂園 機張',d:'步行5分即達・Pass免費入場・童話城堡主題各年齡適合',q:'롯데월드 어드벤처 부산',kids:['Pass免費','各年齡適合']},
+    {t:'13:00',n:'午餐：樂天世界內',d:'園區內餐廳解決，不浪費玩樂時間',q:null,badge:'園區內',badgeType:'activity'},
+    {t:'14:00',n:'繼續玩樂天世界',d:'下午繼續遊玩，16:30前結束準備出發',q:null},
+    {t:'16:30',n:'機張→青沙浦',d:'約10-15分・₩8,000-10,000・機張在青沙浦東側，不走回頭路',q:null,tr:true},
+    {t:'17:00',n:'青沙浦散步，等候膠囊列車',d:'海景咖啡廳稍作休息，或在青沙浦海邊走走',q:'청사포'},
+    {t:'17:30',n:'天空膠囊列車 青沙浦→尾浦',d:'每廂最多4人・₩15,000/廂・12人分3組・約30-40分抵達尾浦・KKday已確認有青沙浦出發班次',q:'해운대블루라인파크',badge:'🚞 列車',badgeType:'train',kids:['8月中搶票','海景絕佳']},
+    {t:'19:00',n:'晚餐：尾浦周邊',d:'尾浦站附近覓食，烤魚・生魚片・海鮮粥都可選',q:'미포',badge:'待定',badgeType:'pending'},
   ]},
-  {day:5,date:'09/20',dow:'日',title:'新世界百貨・西面購物',hotel:'南浦洞住宿',
-   note:'🔵 全程地鐵2號線：南浦洞站 → 市廳站（Centum City）→ 西面站，一條線搞定不換車',
-   tips:[{type:'tip',text:'採購提醒：如果藥妝、泡麵零食還沒買齊，南浦洞和西面都有 Olive Young，今晚是出發前最後機會，明早 08:30 就要退房出發。'}],
+  {day:3,date:'09/18',dow:'五',title:'Club D Oasis・西面・雪夜覓',hotel:'NewCZ Haeundae Residence',
+   note:'今日路線：Club D Oasis → 計程車 → 西面午餐 → 西面逛街 → 雪夜覓烤肉',
    acts:[
-    {t:'10:00',n:'新世界百貨 Centum City',d:'金氏紀錄最大百貨・戶外恐龍遊樂場免費（小孩最愛）・滑冰場・週末室內最舒適不怕熱',q:'신세계백화점 센텀시티',kids:['育嬰室','恐龍樂園免費','全無障礙'],metro:'地鐵2號線・市廳站'},
-    {t:'14:00 左右',n:'西面逛街',d:'從 Centum City 搭地鐵2號線約10分直達西面站',q:'서면',kids:['西面地下街','Olive Young 旗艦店','平價美妝服飾'],metro:'地鐵2號線・西面站',flex_opts:['還有力氣 → 繼續逛，在西面吃豬肉湯飯晚餐再回南浦洞','想補貨 → 搭地鐵回南浦洞順便掃 Olive Young／藥妝','累了 → 直接回住宿休息，明早輕鬆出發']},
-    {t:'',label:'晚餐（彈性）',n:'豬肉湯飯・西面 或 南浦洞周邊',d:'西面是釜山豬肉湯飯激戰區，推薦在此解決晚餐再搭車回南浦洞',q:'서면 돼지국밥',kids:['釜山必吃']},
+    {t:'10:00',n:'Club D Oasis 汗蒸幕',d:'LCT大樓・大人Pass免費4小時・無敵海景溫泉・週二公休（9/18五 OK）・10:00開門',q:'클럽디오아시스',kids:['Pass免費4hr','無年齡限制']},
+    {t:'11:30',n:'Club D Oasis → 西面',d:'約30-35分・₩15,000-20,000・從LCT搭計程車直往西面',q:null,tr:true},
+    {t:'12:00',n:'午餐：秀英돼지국밥（西面）',d:'西面在地豬肉湯飯・濃郁湯底・與下午購物同區不需移動',q:'서면 수영 돼지국밥',badge:'🍲 湯飯',badgeType:'food',
+     flex_opts:['水邊最高（수변최고돼지국밥）・濃郁豬骨湯底・LCT附近・泡完可直接步行前往・但之後需再搭計程車往西面','秀英돼지국밥（西面）・已在西面直接用餐・午餐後步行去逛街，節省一段移動（本行程採此）']},
+    {t:'14:00',n:'西面逛街',d:'西面地下街・Olive Young・平價美妝服飾・韓國潮流聚集地',q:'서면',kids:['西面地下街','Olive Young']},
+    {t:'18:00',n:'晚餐：雪夜覓烤肉',d:'西面人氣烤肉店・✅ 已訂位 18:00・分兩筆訂單・請出示訂位確認',q:'설야멱 서면',badge:'🥩 烤肉',badgeType:'food',kids:['✅ 已訂位 18:00']},
+  ]},
+  {day:4,date:'09/19',dow:'六',title:'換住南浦洞・影島・札嘎其',hotel:'Hotel Ground27 Check-in',
+   note:'今日路線：NewCZ 退房 → Hotel Ground27 → 李在魔披薩 → 白淺灘 → Arte Museum → 札嘎其晚餐<br>🔴 廣安里無人機秀已取消，今天行程較輕鬆',
+   tips:[{type:'ok',text:'廣安里已取消，今天行程輕鬆很多，19:00前就可以回飯店休息，不用趕地鐵。'}],
+   acts:[
+    {t:'10:00',n:'NewCZ退房',d:'整理行李準備出發',q:null},
+    {t:'10:00',n:'NewCZ → Hotel Ground27',d:'約25-30分・₩18,000-22,000・海雲台往西到南浦洞',q:null,tr:true},
+    {t:'10:30',n:'Hotel Ground27 Check-in / 寄放行李',d:'南浦站步行1分・16:00 正式Check-in・先寄放行李再出發',q:'Hotel Ground27 부산',sw:true},
+    {t:'12:00',n:'午餐：李在魔披薩（이재모피자）',d:'南浦洞在地人氣手工披薩・步行可達・建議早到排隊',q:'이재모피자 남포동',badge:'🍕 披薩',badgeType:'food',kids:['人氣排隊店']},
+    {t:'13:30',n:'南浦洞 → 白淺灘文化村',d:'約15-20分・₩10,000-13,000・過影島大橋進影島',q:null,tr:true},
+    {t:'14:00',n:'白淺灘文化村',d:'釜山版聖托里尼・免費入場・藍白小巷打卡・建議1-1.5小時',q:'흰여울문화마을',kids:['免費入場','注意孩子腳力']},
+    {t:'15:30',n:'白淺灘 → Arte Museum',d:'約5-10分・₩5,000・同在影島內，非常近',q:null,tr:true},
+    {t:'16:00',n:'Arte Museum 釜山',d:'影島區海洋路247號街29・沉浸式數位藝術・約1.5-2小時・20:00關門，建議17:30前離開',q:'아르떼뮤지엄 부산',kids:['沉浸式體驗','親子友善']},
+    {t:'17:30',n:'Arte Museum → 札嘎其市場',d:'約10-15分・₩8,000-10,000・影島→南浦洞方向',q:null,tr:true},
+    {t:'18:00',n:'晚餐：札嘎其市場',d:'現撈海鮮・2樓餐廳料理・吃完步行7分回Hotel Ground27',q:'자갈치시장',badge:'🦀 海鮮',badgeType:'food'},
+    {t:'20:00',n:'步行回 Hotel Ground27',d:'札嘎其→Ground27步行約7分，輕鬆收尾',q:null,walk:true},
+  ]},
+  {day:5,date:'09/20',dow:'日',title:'松島纜車・富平市場・樂天百貨',hotel:'Hotel Ground27',
+   note:'📍 松島・富平・樂天百貨全在南浦洞西側，步行或短車程串聯',
+   acts:[
+    {t:'08:00',n:'早餐：Egg Drop（南浦）',d:'南浦洞人氣吐司早餐・步行可達・招牌蛋汁吐司多種口味',q:'에그드랍 남포',badge:'🍳 早餐',badgeType:'food'},
+    {t:'09:00',n:'Hotel Ground27 → 松島',d:'約10-15分・₩6,000-10,000・南浦洞往西搭計程車',q:null,tr:true},
+    {t:'09:30',n:'松島海上纜車',d:'釜山最長海上纜車・透明底板廂可選・約1小時',q:'송도해상케이블카',kids:['海景纜車','透明底板可選']},
+    {t:'11:00',n:'松島 → 富平市場',d:'約10-15分・₩5,000-8,000・計程車；或沿海步行約20分',q:null,tr:true},
+    {t:'12:00',n:'午餐：富平市場',d:'釜山傳統市場・韓式小吃・魚糕・餃子・떡볶이・距南浦洞步行約10分',q:'부평시장',badge:'🏪 市場小吃',badgeType:'activity'},
+    {t:'14:00',n:'樂天百貨 光復店（南浦）',d:'距富平市場步行約5分・購物免稅・頂樓可眺望釜山港',q:'롯데백화점 광복점',kids:['免稅購物']},
+    {t:'17:00',n:'最後購物補貨',d:'Olive Young・藥妝・泡麵零食・南浦洞周邊一次搞定・明早08:00 Egg Drop早餐・09:00出發松島',q:'남포동 올리브영',kids:['今晚最後機會']},
+    {t:'19:00',n:'晚餐：南浦洞周邊',d:'輕鬆步行找餐廳，行程輕鬆收尾',q:'남포동 맛집'},
   ]},
   {day:6,date:'09/21',dow:'一',title:'返回台灣・再見釜山',hotel:'— 平安回家 🎉',acts:[
-    {t:'08:30',n:'南浦洞住宿退房 → 出發機場',d:'南浦洞→金海機場計程車約40分・最晚09:15出發・12:30班機需10:30前報到',q:'남포동',tr:true},
+    {t:'07:30',n:'早餐：南浦雪濃湯',d:'南浦洞在地牛骨濃湯・釜山最後一頓暖心韓式早餐・步行可達',q:'남포동 설렁탕',badge:'🍜 早餐',badgeType:'food'},
+    {t:'08:30',n:'Hotel Ground27 退房 → 出發機場',d:'南浦洞→金海機場計程車約40分・最晚09:15出發・12:30班機需10:30前報到',q:'남포동',tr:true},
     {t:'12:30',n:'JX901 金海起飛 → 桃園 13:45 落地',d:'再見釜山！부산 또 올게요！👋',q:'김해국제공항',tr:true},
   ]},
 ];
@@ -1088,7 +1120,7 @@ const CL_DEFAULT=[
     {id:'c1i2',text:'機票電子票 JX900（去程）'},
     {id:'c1i3',text:'機票電子票 JX901（回程）'},
     {id:'c1i4',text:'NewCZ Haeundae 訂房確認單'},
-    {id:'c1i5',text:'H-AVENUE Seomyeon 訂房確認單'},
+    {id:'c1i5',text:'Hotel Ground27 訂房確認單'},
     {id:'c1i6',text:'旅遊平安險保單'},
   ]},
   {id:'c2',cat:'🧒 小孩（6歲）',items:[
@@ -1173,12 +1205,19 @@ const DOCS_DEFAULT=[
   {id:'d1',icon:'✈️',name:'去程機票 JX900',desc:'9/16 桃園 → 金海 08:15'},
   {id:'d2',icon:'✈️',name:'回程機票 JX901',desc:'9/21 金海 → 桃園 12:30'},
   {id:'d3',icon:'🏨',name:'NewCZ Haeundae 訂房確認',desc:'9/16–9/19，3晚'},
-  {id:'d4',icon:'🏨',name:'H-AVENUE Seomyeon 訂房確認',desc:'9/19–9/21，2晚'},
+  {id:'d4',icon:'🏨',name:'Hotel Ground27 訂房確認',desc:'9/19–9/21，2晚・Jung-gu 中區'},
   {id:'d5',icon:'🛡️',name:'旅遊平安險保單',desc:'全家旅平險'},
   {id:'d6',icon:'🎫',name:'水族館門票',desc:'SEA LIFE Busan 線上票'},
+  {id:'d_sy1',icon:'🥩',name:'雪夜覓訂位・訂單一',desc:'9/18（五）18:00・西面・雪夜覓烤肉',link:'https://drive.google.com/file/d/1AEEqbpmdkz3WUM4juaT4-JH0GBrYE1oJ/view?usp=drive_link'},
+  {id:'d_sy2',icon:'🥩',name:'雪夜覓訂位・訂單二',desc:'9/18（五）18:00・西面・雪夜覓烤肉',link:'https://drive.google.com/file/d/1BYeGyLo0Ckp-9M6VwEnHyKiUzeoL65Sp/view?usp=drive_link'},
   {id:'d7',icon:'📄',name:'其他重要文件',desc:'其他相關電子文件'},
 ];
-const getDocs=()=>{const d=localStorage.getItem('doc_items');return d?JSON.parse(d):JSON.parse(JSON.stringify(DOCS_DEFAULT));};
+const getDocs=()=>{
+  const d=localStorage.getItem('doc_items');
+  if(!d)return JSON.parse(JSON.stringify(DOCS_DEFAULT));
+  const stored=JSON.parse(d),ids=new Set(stored.map(x=>x.id));
+  return [...stored,...DOCS_DEFAULT.filter(x=>!ids.has(x.id))];
+};
 const saveDocs=d=>localStorage.setItem('doc_items',JSON.stringify(d));
 
 const CN=['餐飲','交通','住宿','購物','景點','其他'];
@@ -1226,9 +1265,9 @@ function initCD(){
 
 // ═══ ITINERARY ════════════════════════════
 function makeRouteUrl(day){
-  const stops=day.acts.filter(a=>a.q);
+  const stops=day.acts.filter(a=>a.q&&!a.tr&&!a.walk);
   if(stops.length<2)return null;
-  return `https://map.naver.com/p/search/${encodeURIComponent(stops[0].q)}`;
+  return 'https://www.google.com/maps/dir/'+stops.slice(0,6).map(a=>encodeURIComponent(a.q)).join('/');
 }
 function showDay(i){
   document.querySelectorAll('.dt-btn').forEach((el,j)=>el.classList.toggle('active',i===j));
@@ -1243,7 +1282,7 @@ function initItin(){
     </button>`).join('');
   document.getElementById('itin-container').innerHTML=ITIN.map((day,i)=>{
     const routeUrl=makeRouteUrl(day);
-    const stopNames=day.acts.filter(a=>a.q).map(a=>a.n).slice(0,4).join(' → ');
+    const stopNames=day.acts.filter(a=>a.q&&!a.tr&&!a.walk).map(a=>a.n).slice(0,4).join(' → ');
     return `
     <div class="day-panel ${i===0?'active':''}" id="dp${day.day}">
       <div class="dp-head">
@@ -1254,21 +1293,40 @@ function initItin(){
       ${routeUrl?`<a class="route-btn" href="${routeUrl}" target="_blank">
         <span class="rb-icon">🗺️</span>
         <div class="rb-body">
-          <div class="rb-title">今日路線地圖（Naver Map）</div>
+          <div class="rb-title">今日路線地圖（Google Maps）</div>
           <div class="rb-sub">${stopNames}</div>
         </div>
         <span class="rb-arrow">↗</span>
       </a>`:''}
       ${day.note?`<div class="day-note">${day.note}</div>`:''}
       <div class="card" style="padding:14px">
-        ${day.acts.map((a,ai)=>`
+        ${day.acts.map((a,ai)=>{
+          const isLast=ai===day.acts.length-1;
+          const isTr=a.tr||a.walk;
+          const trIcon=a.walk?'🚶':a.n.match(/JX\d|班機|起飛|飛機|落地/)?'✈️':'🚕';
+          if(isTr) return `
+          <div class="tl-item is-tr">
+            <div class="tl-lt"><span class="tl-tm tl-tm-tr">${a.t}</span></div>
+            <div class="tl-ct"><div class="tl-dt-tr"></div>${!isLast?'<div class="tl-ln"></div>':''}</div>
+            <div class="tl-co">
+              <div class="tr-chip">
+                <span class="tr-chip-ic">${trIcon}</span>
+                <div class="tr-chip-body">
+                  <div class="tr-chip-nm">${a.n}</div>
+                  ${a.d?`<div class="tr-chip-meta">${a.d}</div>`:''}
+                </div>
+              </div>
+              ${a.q?`<a class="map-btn" style="margin-top:5px;font-size:10.5px" href="https://map.naver.com/p/search/${encodeURIComponent(a.q)}" target="_blank">📍 地圖</a>`:''}
+            </div>
+          </div>`;
+          return `
           <div class="tl-item">
             <div class="tl-lt"><span class="tl-tm">${a.t}</span></div>
-            <div class="tl-ct"><div class="tl-dt ${a.tr?'tr':a.sw?'sw':''}"></div>${ai<day.acts.length-1?'<div class="tl-ln"></div>':''}</div>
+            <div class="tl-ct"><div class="tl-dt ${a.sw?'sw':''}"></div>${!isLast?'<div class="tl-ln"></div>':''}</div>
             <div class="tl-co">
               ${a.highlight?'<div class="tl-hi">':''}
               ${a.label?`<div class="act-lbl">${a.label}</div>`:''}
-              <div class="tl-nm">${a.n}${a.sw?'<span class="sw-bg">換住</span>':a.tr?'<span class="tr-bg">交通</span>':''}${a.isNew?'<span class="new-bg">★ 新加入</span>':''}</div>
+              <div class="tl-nm">${a.n}${a.sw?'<span class="sw-bg">換住</span>':''}${a.isNew?'<span class="new-bg">★ 新加入</span>':''}${a.badge?`<span class="ci-badge ${a.badgeType||'activity'}">${a.badge}</span>`:''}</div>
               <div class="tl-dc">${a.d}</div>
               ${a.kids&&a.kids.length?`<div class="ktags">${a.kids.map(k=>`<span class="ktag">${k}</span>`).join('')}</div>`:''}
               ${a.metro?`<div class="metro-btn">🔵 ${a.metro}</div>`:''}
@@ -1276,9 +1334,10 @@ function initItin(){
               ${a.flex_opts?`<div class="flex-box"><div style="font-size:11.5px;font-weight:700;color:var(--t2);margin-bottom:2px">逛完視當天狀態彈性決定：</div><ul>${a.flex_opts.map(o=>`<li>${o}</li>`).join('')}</ul></div>`:''}
               ${a.highlight?'</div>':''}
             </div>
-          </div>`).join('')}
+          </div>`;
+        }).join('')}
       </div>
-      ${day.tips?day.tips.map(t=>`<div class="${t.type==='warn'?'warn-tip':'tip'}">${t.type==='warn'?'⚠️ ':'💡 '}${t.text}</div>`).join(''):''}
+      ${day.tips?day.tips.map(t=>`<div class="${t.type==='warn'?'warn-tip':t.type==='ok'?'ok-tip':'tip'}">${t.type==='warn'?'⚠️ ':t.type==='ok'?'✅ ':'💡 '}${t.text}</div>`).join(''):''}
     </div>`;
   }).join('');
 }
@@ -1977,7 +2036,7 @@ function toggleDocEdit(){
 function renD(){
   const lnks=gDL(),docs=getDocs();
   document.getElementById('doc-container').innerHTML=docs.map(doc=>{
-    const lnk=lnks[doc.id]||'';
+    const lnk=lnks[doc.id]||doc.link||'';
     return `<div class="doc-card">
       <div class="doc-ic">${doc.icon||'📄'}</div>
       <div class="doc-in">
